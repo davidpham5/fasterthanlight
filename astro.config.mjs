@@ -22,6 +22,9 @@ function netlifyRedirects() {
 export default defineConfig({
   site: 'https://fasterthanlight.studio',
   output: 'static',
+  // One file per page (about.html, not about/index.html): Netlify serves /about directly instead
+  // of 301-redirecting every internal link to /about/.
+  build: { format: 'file' },
   // Emit scripts as files (never inline) so the CSP can use script-src 'self'.
   vite: { build: { assetsInlineLimit: 0 } },
   redirects: { '/gallery': `/gallery/${firstSet}` },

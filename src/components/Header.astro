@@ -1,7 +1,8 @@
 ---
 import { sets, site } from '../lib/content';
+import { pagePath } from '../lib/url';
 
-const path = Astro.url.pathname;
+const path = pagePath(Astro.url.pathname);
 const links = [
   { href: `/gallery/${sets[0].slug}`, label: 'Gallery', section: '/gallery' },
   { href: '/about', label: 'About', section: '/about' },

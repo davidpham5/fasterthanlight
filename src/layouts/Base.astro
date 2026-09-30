@@ -4,6 +4,7 @@ import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
 import { urlFor } from '../lib/cloudinary';
 import { hero, site } from '../lib/content';
+import { pagePath } from '../lib/url';
 
 interface Props {
   title?: string;
@@ -14,7 +15,7 @@ interface Props {
 const { title, description = site.description, noindex = false } = Astro.props;
 const fullTitle = title ? `${title} — ${site.name}` : site.name;
 const robots = noindex ? 'noindex, noai, noimageai' : 'noai, noimageai';
-const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const canonical = new URL(pagePath(Astro.url.pathname), Astro.site).href;
 const ogImage = urlFor(site.cloudName, hero.id, 1600);
 const jsonLd = {
   '@context': 'https://schema.org',

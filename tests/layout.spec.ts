@@ -36,3 +36,11 @@ test('skip link moves focus to the main content', async ({ page }) => {
   await page.keyboard.press('Tab');
   await expect(page.getByRole('link', { name: 'Skip to content' })).toBeFocused();
 });
+
+test('the current section is marked in the main navigation', async ({ page }) => {
+  await page.goto('/about');
+  const nav = page.getByRole('navigation', { name: 'Main' });
+  await expect(nav.getByRole('link', { name: 'About' })).toHaveAttribute('aria-current', 'true');
+  await page.goto(`/gallery/${firstSet.slug}`);
+  await expect(nav.getByRole('link', { name: 'Gallery' })).toHaveAttribute('aria-current', 'true');
+});
