@@ -1,6 +1,6 @@
 # fasterthanlight
 
-Portfolio site for **FasterThanLight Studios**, corporate event photography by David Pham:
+Portfolio site for **FasterThanLight Studios**, event, hospitality and documentary photography by David Pham:
 https://fasterthanlight.studio
 
 ## Licensing

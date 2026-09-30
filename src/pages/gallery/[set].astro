@@ -16,10 +16,7 @@ interface Props {
 const { set } = Astro.props;
 ---
 
-<Base
-  title={set.title}
-  description={`${set.title} — corporate event photography by ${site.owner}.`}
->
+<Base title={set.title} description={`${set.title} — photography by ${site.owner}.`}>
   <h1 class="visually-hidden">{set.title}</h1>
   <SetSwitcher sets={sets} current={set.slug} />
   <Slideshow set={set} />
