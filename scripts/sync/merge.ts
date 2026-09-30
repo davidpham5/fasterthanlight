@@ -103,3 +103,20 @@ export function mergePhotos(
 
   return { data: { sets, extras }, report };
 }
+
+/**
+ * Reasons to refuse writing a sync result. An empty or mostly-emptied photos.json almost always
+ * means Cloudinary was listed wrongly (wrong folder, wrong account), not that photos were deleted.
+ */
+export function syncProblems(before: PhotosFile, after: PhotosFile, report: MergeReport): string[] {
+  const problems: string[] = [];
+  if (after.sets.length === 0) {
+    problems.push('Cloudinary returned no photos under portfolio/ — photos.json would be emptied.');
+    return problems;
+  }
+  const total = before.sets.reduce((sum, set) => sum + set.photos.length, 0);
+  if (total > 0 && report.removed.length > total / 2) {
+    problems.push(`This sync would remove ${report.removed.length} of ${total} photos.`);
+  }
+  return problems;
+}

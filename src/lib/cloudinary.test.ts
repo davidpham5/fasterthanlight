@@ -65,3 +65,28 @@ describe('defaultWidth', () => {
     expect(defaultWidth(300)).toBe(400);
   });
 });
+
+describe('2560 px long-edge cap (spec §5)', () => {
+  it('limits both width and height on the largest size', () => {
+    expect(urlFor('demo', 'tall', 2560)).toBe(
+      'https://res.cloudinary.com/demo/image/upload/f_auto,q_auto,c_limit,w_2560,h_2560/tall',
+    );
+  });
+
+  it('describes a height-capped portrait by its delivered width', () => {
+    expect(srcsetEntries(4000, 6000)).toEqual([
+      { width: 400, descriptor: 400 },
+      { width: 800, descriptor: 800 },
+      { width: 1600, descriptor: 1600 },
+      { width: 2560, descriptor: 1707 },
+    ]);
+  });
+
+  it('drops the largest size when the height cap makes it no wider than the previous one', () => {
+    expect(srcsetEntries(1700, 5000)).toEqual([
+      { width: 400, descriptor: 400 },
+      { width: 800, descriptor: 800 },
+      { width: 1600, descriptor: 1600 },
+    ]);
+  });
+});

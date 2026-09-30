@@ -10,6 +10,13 @@ interface Props {
 
 const { set } = Astro.props;
 const count = set.photos.length;
+
+// Keep in sync with the image width rule in the styles below: the displayed width is the stage
+// width (viewport minus gutters and arrow columns) or the height budget times the aspect ratio.
+const STAGE_HEIGHT = 'max(100vh - 18rem, 65vh)';
+const aspect = (photo: PhotoSet['photos'][number]) => +(photo.width / photo.height).toFixed(4);
+const sizesFor = (photo: PhotoSet['photos'][number]) =>
+  `min(calc(100vw - 7.5rem), calc(${STAGE_HEIGHT} * ${aspect(photo)}))`;
 ---
 
 <!--
@@ -26,8 +33,8 @@ const count = set.photos.length;
     <ol class="set__list">
       {set.photos.map((photo, i) => (
         <li class:list={['set__item', { 'is-active': i === 0 }]}>
-          <figure style={`--ar:${photo.width / photo.height}`}>
-            <Photo photo={photo} sizes="(min-width: 64rem) 80vw, 100vw" priority={i === 0} />
+          <figure style={`--ar:${aspect(photo)}`}>
+            <Photo photo={photo} sizes={sizesFor(photo)} priority={i === 0} />
             <figcaption>{photo.caption ?? ''}</figcaption>
           </figure>
         </li>
@@ -111,9 +118,13 @@ const count = set.photos.length;
   figure {
     margin: 0;
   }
-  /* Sized from the known aspect ratio (--ar) so the box is final before the photo loads. */
+  /*
+   * Sized from the known aspect ratio (--ar) so the box is final before the photo loads. The
+   * height budget never drops below 65% of the screen, so a phone held sideways still shows a
+   * usable photo (at the cost of a little scrolling). Mirrors sizesFor() above.
+   */
   .set__item :global(img) {
-    width: min(100%, calc((100svh - 18rem) * var(--ar)));
+    width: min(100%, calc(max(100svh - 18rem, 65svh) * var(--ar)));
     height: auto;
     aspect-ratio: var(--ar);
     margin: 0 auto;

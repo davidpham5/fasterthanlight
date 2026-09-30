@@ -3312,7 +3312,7 @@ Expected: the summary lists David's sets and photos, plus the extras ids.
 
 - [ ] **Step 3 (David): Enable strict transformations, then verify from the terminal**
 
-David enables **Settings → Security → Strict transformations** and allows the four transformations `f_auto,q_auto,c_limit,w_400`, `…w_800`, `…w_1600` and `…w_2560`, e.g. by marking them allowed under **Transformations**. Then run, using one real photo id:
+David enables **Settings → Security → Strict transformations** and allows the four transformations `f_auto,q_auto,c_limit,w_400`, `f_auto,q_auto,c_limit,w_800`, `f_auto,q_auto,c_limit,w_1600` and `f_auto,q_auto,c_limit,w_2560,h_2560` (the largest also caps height, per the final-review fix), e.g. by marking them allowed under **Transformations**. Then run, using one real photo id:
 
 ```bash
 CLOUD=<cloud>; ID=<a public id>

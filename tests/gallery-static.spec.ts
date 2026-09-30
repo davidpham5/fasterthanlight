@@ -57,6 +57,9 @@ test('/gallery redirects to the first set', async ({ page }) => {
 });
 
 test('Netlify gets a real 301 for /gallery', () => {
+  // Forced (301!) because dist/gallery/index.html exists, and Netlify skips unforced rules
+  // when a file is present at the path.
   const redirects = readFileSync('dist/_redirects', 'utf8');
-  expect(redirects).toContain(`/gallery /gallery/${firstSet.slug} 301`);
+  expect(redirects).toContain(`/gallery /gallery/${firstSet.slug} 301!`);
+  expect(redirects).toContain(`/gallery/ /gallery/${firstSet.slug} 301!`);
 });

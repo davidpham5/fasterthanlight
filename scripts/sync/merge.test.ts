@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { PhotosFile } from '../../src/lib/schema';
-import { mergePhotos, titleFromSlug, type RemoteSet } from './merge';
+import { mergePhotos, syncProblems, titleFromSlug, type RemoteSet } from './merge';
 
 const existing: PhotosFile = {
   sets: [
@@ -104,5 +104,34 @@ describe('mergePhotos', () => {
     );
     expect(result.data.sets[0].photos.map((p) => p.id)).toEqual(['c1']);
     expect(result.report.removed).toEqual(['c2', 'r1']);
+  });
+});
+
+describe('syncProblems', () => {
+  const photo = (id: string) => ({ id, width: 10, height: 10, alt: `Alt ${id}` });
+  const before: PhotosFile = {
+    sets: [{ slug: 'a', title: 'A', photos: ['1', '2', '3', '4'].map(photo) }],
+    extras: {},
+  };
+
+  it('allows a normal sync', () => {
+    const { data, report } = mergePhotos(
+      before,
+      [{ slug: 'a', photos: ['1', '2', '3', '5'].map(photo) }],
+      [],
+    );
+    expect(syncProblems(before, data, report)).toEqual([]);
+  });
+
+  it('refuses to write when Cloudinary returned no photos', () => {
+    const { data, report } = mergePhotos(before, [], []);
+    expect(syncProblems(before, data, report)).toEqual([
+      'Cloudinary returned no photos under portfolio/ — photos.json would be emptied.',
+    ]);
+  });
+
+  it('refuses to write when more than half the photos would be removed', () => {
+    const { data, report } = mergePhotos(before, [{ slug: 'a', photos: [photo('1')] }], []);
+    expect(syncProblems(before, data, report)).toEqual(['This sync would remove 3 of 4 photos.']);
   });
 });

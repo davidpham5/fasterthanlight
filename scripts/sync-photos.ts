@@ -1,9 +1,11 @@
 // Pulls photo metadata from Cloudinary into src/content/photos.json.
 // Usage: npm run sync-photos   (needs CLOUDINARY_URL in .env — see .env.example)
+import { execFileSync } from 'node:child_process';
 import { readFile, writeFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
 import { v2 as cloudinary } from 'cloudinary';
 import type { PhotosFile } from '../src/lib/schema';
-import { mergePhotos, type RemotePhoto, type RemoteSet } from './sync/merge';
+import { mergePhotos, syncProblems, type RemotePhoto, type RemoteSet } from './sync/merge';
 
 const ROOT = 'portfolio';
 const EXTRAS = '_extras';
@@ -37,26 +39,32 @@ async function placeholderFor(id: string): Promise<string> {
   return `data:image/jpeg;base64,${Buffer.from(await res.arrayBuffer()).toString('base64')}`;
 }
 
-async function listPage(folder: string, cursor?: string): Promise<ResourcePage> {
-  const options = { context: true, max_results: 500, next_cursor: cursor };
-  try {
-    // Dynamic-folder accounts (the default for accounts created since 2024).
-    return (await cloudinary.api.resources_by_asset_folder(folder, options)) as ResourcePage;
-  } catch {
-    // Fixed-folder accounts: folders are public_id prefixes.
-    return (await cloudinary.api.resources({
-      ...options,
-      type: 'upload',
-      prefix: `${folder}/`,
-    })) as ResourcePage;
-  }
+type FolderMode = 'dynamic' | 'fixed';
+
+async function folderMode(): Promise<FolderMode> {
+  const { settings } = await cloudinary.api.config({ settings: true });
+  return settings?.folder_mode ?? 'fixed';
 }
 
-async function listFolder(folder: string): Promise<RemotePhoto[]> {
+async function listPage(mode: FolderMode, folder: string, cursor?: string): Promise<ResourcePage> {
+  const options = { context: true, max_results: 500, next_cursor: cursor };
+  if (mode === 'dynamic') {
+    // Dynamic folders (the default for accounts created since 2024).
+    return (await cloudinary.api.resources_by_asset_folder(folder, options)) as ResourcePage;
+  }
+  // Fixed folders: folders are public_id prefixes.
+  return (await cloudinary.api.resources({
+    ...options,
+    type: 'upload',
+    prefix: `${folder}/`,
+  })) as ResourcePage;
+}
+
+async function listFolder(mode: FolderMode, folder: string): Promise<RemotePhoto[]> {
   const photos: RemotePhoto[] = [];
   let cursor: string | undefined;
   do {
-    const page = await listPage(folder, cursor);
+    const page = await listPage(mode, folder, cursor);
     for (const r of page.resources) {
       if (r.resource_type !== 'image') continue;
       const meta = r.context?.custom ?? {};
@@ -75,12 +83,31 @@ async function listFolder(folder: string): Promise<RemotePhoto[]> {
   return photos.sort((a, b) => a.id.localeCompare(b.id));
 }
 
+function hasUncommittedEdits(): boolean {
+  try {
+    execFileSync('git', ['diff', '--quiet', 'HEAD', '--', fileURLToPath(FILE)]);
+    return false;
+  } catch {
+    return true;
+  }
+}
+
 async function main(): Promise<void> {
   if (!process.env.CLOUDINARY_URL) {
     console.error('CLOUDINARY_URL is not set. Copy .env.example to .env and fill it in.');
     process.exit(1);
   }
+  const force = process.argv.includes('--force');
+  if (!force && hasUncommittedEdits()) {
+    console.error(
+      'src/content/photos.json has uncommitted changes. Commit them first so a sync can never ' +
+        'lose your edits (or rerun with --force).',
+    );
+    process.exit(1);
+  }
+
   cloudinary.config({ secure: true });
+  const mode = await folderMode();
 
   const { folders } = (await cloudinary.api.sub_folders(ROOT)) as {
     folders: { name: string; path: string }[];
@@ -89,9 +116,9 @@ async function main(): Promise<void> {
   let remoteExtras: RemotePhoto[] = [];
   for (const folder of folders) {
     if (folder.name === EXTRAS) {
-      remoteExtras = await listFolder(folder.path);
+      remoteExtras = await listFolder(mode, folder.path);
     } else if (SLUG.test(folder.name)) {
-      remoteSets.push({ slug: folder.name, photos: await listFolder(folder.path) });
+      remoteSets.push({ slug: folder.name, photos: await listFolder(mode, folder.path) });
     } else {
       console.warn(`Skipping folder "${folder.path}": name must be lowercase-with-hyphens.`);
     }
@@ -99,6 +126,14 @@ async function main(): Promise<void> {
 
   const existing = JSON.parse(await readFile(FILE, 'utf8')) as PhotosFile;
   const { data, report } = mergePhotos(existing, remoteSets, remoteExtras);
+  const problems = syncProblems(existing, data, report);
+  if (problems.length > 0 && !force) {
+    console.error(`Nothing written. ${problems.join(' ')}`);
+    console.error(
+      'Check the folder names in Cloudinary, or rerun with --force if this is intended.',
+    );
+    process.exit(1);
+  }
   await writeFile(FILE, `${JSON.stringify(data, null, 2)}\n`);
 
   const total = data.sets.reduce((sum, set) => sum + set.photos.length, 0);

@@ -23,4 +23,8 @@ Requires Node 24 (`.nvmrc`).
 1. Upload exports to Cloudinary folders `portfolio/<set-slug>/` (hero and portrait go in
    `portfolio/_extras/`). Set `alt` (and optionally `caption`) in each photo's contextual metadata.
 2. `cp .env.example .env` and fill in `CLOUDINARY_URL` (first time only).
-3. `npm run sync-photos`, review with `git diff src/content/photos.json`, then commit.
+3. Commit any edits you made to `src/content/photos.json` first (the sync refuses to run over
+   uncommitted changes, so it can never lose your alt text or captions).
+4. `npm run sync-photos`, review with `git diff src/content/photos.json`, then commit.
+   The sync also refuses to write if it would empty the file or remove more than half the photos
+   (usually a folder-name mistake); add `-- --force` only if that is really what you want.

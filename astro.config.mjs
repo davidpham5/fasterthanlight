@@ -5,13 +5,14 @@ import photos from './src/content/photos.json' with { type: 'json' };
 
 const firstSet = photos.sets[0].slug;
 
-/** Writes dist/_redirects so Netlify serves /gallery as a real 301 (Astro emits a meta refresh). */
+/** Writes dist/_redirects so Netlify serves /gallery as a real 301. Forced (301!) because Astro
+ * also emits dist/gallery/index.html (a meta refresh), which would otherwise shadow the rule. */
 function netlifyRedirects() {
   return {
     name: 'netlify-redirects',
     hooks: {
       'astro:build:done': async ({ dir }) => {
-        const rules = [`/gallery /gallery/${firstSet} 301`, `/gallery/ /gallery/${firstSet} 301`];
+        const rules = [`/gallery /gallery/${firstSet} 301!`, `/gallery/ /gallery/${firstSet} 301!`];
         await writeFile(new URL('_redirects', dir), `${rules.join('\n')}\n`);
       },
     },

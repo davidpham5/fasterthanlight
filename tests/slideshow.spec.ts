@@ -150,3 +150,30 @@ test('gallery page loads without layout shift', async ({ page }) => {
   );
   expect(cls).toBeLessThanOrEqual(0.05);
 });
+
+test('slideshow photos download at the size they display, not larger', async ({ page }) => {
+  await page.goto(`/gallery/${multi.slug}`);
+  const img = page.locator('.set__item.is-active img');
+  await expect(img).toHaveJSProperty('complete', true);
+  const { src, rendered, dpr } = await img.evaluate((el) => ({
+    src: (el as HTMLImageElement).currentSrc,
+    rendered: el.getBoundingClientRect().width,
+    dpr: window.devicePixelRatio,
+  }));
+  const requested = Number(/w_(\d+)/.exec(src)![1]);
+  // The smallest allowed width that covers the displayed size is the right download.
+  const enough = [400, 800, 1600, 2560].find((w) => w >= rendered * dpr) ?? 2560;
+  expect(requested).toBeLessThanOrEqual(enough);
+});
+
+test.describe('phone held sideways', () => {
+  test.use({ viewport: { width: 750, height: 342 } });
+
+  test('a landscape photo stays usefully large', async ({ page }) => {
+    const set = setWith((s) => s.photos[0].width > s.photos[0].height);
+    test.skip(!set, 'content has no set that opens on a landscape photo');
+    await page.goto(`/gallery/${set!.slug}`);
+    const box = await page.locator('.set__item.is-active img').boundingBox();
+    expect(box!.height).toBeGreaterThanOrEqual(342 * 0.6);
+  });
+});
