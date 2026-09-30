@@ -66,3 +66,10 @@ test('netlify.toml sets the protective headers and domain redirects', () => {
   expect(toml).toContain("script-src 'self'");
   expect(toml).toContain('from = "https://thisismynext.photos/*"');
 });
+
+test('the old misspelled Portraits URL redirects permanently', () => {
+  const toml = readFileSync('netlify.toml', 'utf8');
+  expect(toml).toMatch(
+    /from = "\/gallery\/protraits"\s+to = "\/gallery\/portraits"\s+status = 301\s+force = true/,
+  );
+});

@@ -18,6 +18,13 @@
   status = 301
   force = true
 
+# The Portraits set was first published under a misspelled folder name.
+[[redirects]]
+  from = "/gallery/protraits"
+  to = "/gallery/portraits"
+  status = 301
+  force = true
+
 [[headers]]
   for = "/*"
   [headers.values]
