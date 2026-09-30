@@ -1,0 +1,93 @@
+{
+  "sets": [
+    {
+      "slug": "conferences",
+      "title": "Conferences & Keynotes",
+      "photos": [
+        {
+          "id": "samples/people/jazz",
+          "width": 3000,
+          "height": 1993,
+          "alt": "Musicians performing on a lit stage",
+          "caption": "Opening act — placeholder photo"
+        },
+        {
+          "id": "happy_people",
+          "width": 1920,
+          "height": 1279,
+          "alt": "A group of attendees laughing together"
+        },
+        {
+          "id": "samples/people/kitchen-bar",
+          "width": 1220,
+          "height": 813,
+          "alt": "Guests talking at a bar counter",
+          "caption": "Networking reception — placeholder photo"
+        }
+      ]
+    },
+    {
+      "slug": "galas",
+      "title": "Galas & Awards",
+      "photos": [
+        {
+          "id": "samples/landscapes/girl-urban-view",
+          "width": 2048,
+          "height": 1252,
+          "alt": "A guest looking out over a city skyline",
+          "caption": "Rooftop reception — placeholder photo"
+        },
+        {
+          "id": "samples/people/bicycle",
+          "width": 2889,
+          "height": 1926,
+          "alt": "A person riding a bicycle down a city street"
+        }
+      ]
+    },
+    {
+      "slug": "launches",
+      "title": "Product Launches",
+      "photos": [
+        {
+          "id": "bike",
+          "width": 2000,
+          "height": 1333,
+          "alt": "A bicycle parked against a wall",
+          "caption": "Launch display — placeholder photo"
+        }
+      ]
+    },
+    {
+      "slug": "headshots",
+      "title": "On-site Headshots",
+      "photos": [
+        {
+          "id": "samples/man-portrait",
+          "width": 1333,
+          "height": 2000,
+          "alt": "Portrait of a man in a jacket",
+          "caption": "Executive headshot — placeholder photo"
+        },
+        {
+          "id": "woman",
+          "width": 1000,
+          "height": 688,
+          "alt": "Portrait of a woman smiling"
+        }
+      ]
+    }
+  ],
+  "extras": {
+    "samples/landscapes/architecture-signs": {
+      "width": 3000,
+      "height": 2000,
+      "alt": "A city street lined with signs"
+    },
+    "samples/people/smiling-man": {
+      "width": 849,
+      "height": 565,
+      "alt": "Portrait of David Pham"
+    }
+  }
+}
