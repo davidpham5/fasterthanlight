@@ -1,0 +1,14 @@
+---
+import Base from '../layouts/Base.astro';
+import { sets } from '../lib/content';
+---
+
+<Base title="Thank you" noindex>
+  <div class="page prose">
+    <h1>Thank you</h1>
+    <p>Your inquiry is on its way. I'll reply by email soon.</p>
+    <p>
+      <a href={`/gallery/${sets[0].slug}`}>Back to the gallery</a>
+    </p>
+  </div>
+</Base>

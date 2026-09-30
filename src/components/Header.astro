@@ -1,0 +1,61 @@
+---
+import { sets, site } from '../lib/content';
+import { pagePath } from '../lib/url';
+
+const path = pagePath(Astro.url.pathname);
+const links = [
+  { href: `/gallery/${sets[0].slug}`, label: 'Gallery', section: '/gallery' },
+  { href: '/about', label: 'About', section: '/about' },
+  { href: '/contact', label: 'Contact', section: '/contact' },
+];
+const isCurrent = (section: string) => path === section || path.startsWith(`${section}/`);
+---
+
+<header class="site-header">
+  <a class="wordmark" href="/">
+    {site.name}
+  </a>
+  <nav aria-label="Main">
+    <ul>
+      {links.map((link) => (
+        <li>
+          <a href={link.href} aria-current={isCurrent(link.section) ? 'true' : undefined}>
+            {link.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+</header>
+
+<style>
+  .site-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem 2rem;
+    min-height: var(--header-h);
+    padding: 1rem var(--gutter);
+  }
+  .wordmark {
+    font-size: clamp(1.375rem, 2.6vw, 2rem);
+    letter-spacing: -0.02em;
+    text-decoration: none;
+  }
+  ul {
+    display: flex;
+    gap: 1.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  nav a {
+    padding-bottom: 2px;
+    text-decoration: none;
+  }
+  nav a[aria-current],
+  nav a:hover {
+    border-bottom: 1px solid currentColor;
+  }
+</style>

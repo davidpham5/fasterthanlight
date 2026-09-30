@@ -1,0 +1,63 @@
+---
+import Photo from '../components/Photo.astro';
+import Base from '../layouts/Base.astro';
+import { hero, sets, site } from '../lib/content';
+---
+
+<Base>
+  <section class="hero">
+    <Photo photo={hero} sizes="100vw" priority class="hero__img" />
+    <div class="hero__overlay">
+      <h1 class="hero__tagline">{site.tagline}</h1>
+      <a class="hero__link" href={`/gallery/${sets[0].slug}`}>
+        View the work →
+      </a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .hero {
+    position: relative;
+    height: calc(100svh - var(--header-h));
+    min-height: 26rem;
+    overflow: hidden;
+    background: #222;
+  }
+  .hero :global(.hero__img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 50%;
+    background: linear-gradient(transparent, rgb(0 0 0 / 55%));
+  }
+  .hero__overlay {
+    position: absolute;
+    left: var(--gutter);
+    right: var(--gutter);
+    bottom: clamp(1.5rem, 6vh, 3.5rem);
+    z-index: 1;
+    color: #fff;
+  }
+  .hero__tagline {
+    max-width: 18ch;
+    margin: 0;
+    font-size: clamp(2rem, 5vw, 3.75rem);
+    font-weight: 500;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+  }
+  .hero__link {
+    display: inline-block;
+    margin-top: 1rem;
+    padding-bottom: 2px;
+    border-bottom: 1px solid currentColor;
+    color: #fff;
+    text-decoration: none;
+  }
+</style>

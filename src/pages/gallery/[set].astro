@@ -1,0 +1,23 @@
+---
+import type { GetStaticPaths } from 'astro';
+import SetSwitcher from '../../components/SetSwitcher.astro';
+import Slideshow from '../../components/Slideshow.astro';
+import Base from '../../layouts/Base.astro';
+import { sets, site } from '../../lib/content';
+import type { PhotoSet } from '../../lib/schema';
+
+export const getStaticPaths = (() =>
+  sets.map((set) => ({ params: { set: set.slug }, props: { set } }))) satisfies GetStaticPaths;
+
+interface Props {
+  set: PhotoSet;
+}
+
+const { set } = Astro.props;
+---
+
+<Base title={set.title} description={`${set.title} — photography by ${site.owner}.`}>
+  <h1 class="visually-hidden">{set.title}</h1>
+  <SetSwitcher sets={sets} current={set.slug} />
+  <Slideshow set={set} />
+</Base>

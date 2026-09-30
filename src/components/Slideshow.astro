@@ -1,0 +1,203 @@
+---
+import Photo from './Photo.astro';
+import { urlFor } from '../lib/cloudinary';
+import { site } from '../lib/content';
+import type { PhotoSet } from '../lib/schema';
+
+interface Props {
+  set: PhotoSet;
+}
+
+const { set } = Astro.props;
+const count = set.photos.length;
+
+// Keep in sync with the image width rule in the styles below: the displayed width is the stage
+// width (viewport minus gutters and arrow columns) or the height budget times the aspect ratio.
+const STAGE_HEIGHT = 'max(100vh - 18rem, 65vh)';
+const aspect = (photo: PhotoSet['photos'][number]) => +(photo.width / photo.height).toFixed(4);
+const sizesFor = (photo: PhotoSet['photos'][number]) =>
+  `min(calc(100vw - 7.5rem), calc(${STAGE_HEIGHT} * ${aspect(photo)}))`;
+---
+
+<!--
+  Rendered in slideshow layout (first photo active) so the script causes no layout shift.
+  Without JavaScript, the <noscript> styles below turn it back into a plain list of every photo.
+-->
+<section class="set" data-slideshow aria-label={set.title}>
+  <div class="set__stage">
+    {count > 1 && (
+      <button class="slideshow__nav" data-dir="-1" type="button" aria-label="Previous photo">
+        ‹
+      </button>
+    )}
+    <ol class="set__list">
+      {set.photos.map((photo, i) => (
+        <li class:list={['set__item', { 'is-active': i === 0 }]}>
+          <figure style={`--ar:${aspect(photo)}`}>
+            <Photo photo={photo} sizes={sizesFor(photo)} priority={i === 0} />
+            <figcaption>{photo.caption ?? ''}</figcaption>
+          </figure>
+        </li>
+      ))}
+    </ol>
+    {count > 1 && (
+      <button class="slideshow__nav" data-dir="1" type="button" aria-label="Next photo">
+        ›
+      </button>
+    )}
+  </div>
+  <p class="slideshow__status visually-hidden" aria-live="polite"></p>
+  {count > 1 && (
+    <div class="slideshow__thumbs">
+      {set.photos.map((photo, i) => (
+        <button
+          class:list={['slideshow__thumb', { 'is-active': i === 0 }]}
+          type="button"
+          data-index={i}
+          aria-label={`Photo ${i + 1} of ${count}`}
+          aria-current={i === 0 ? 'true' : undefined}
+        >
+          <img
+            src={urlFor(site.cloudName, photo.id, 400)}
+            alt=""
+            width="56"
+            height="56"
+            loading="lazy"
+            decoding="async"
+          />
+        </button>
+      ))}
+    </div>
+  )}
+  <noscript>
+    <style is:inline>
+      .set .set__stage {
+        display: block;
+      }
+      .set .set__list {
+        display: grid;
+        gap: 3rem;
+      }
+      .set .set__item {
+        display: block;
+      }
+      .set .set__item img {
+        width: auto;
+        max-width: 100%;
+      }
+      .set .slideshow__nav,
+      .set .slideshow__thumbs {
+        display: none;
+      }
+    </style>
+  </noscript>
+</section>
+
+<style>
+  .set {
+    padding: 0 var(--gutter) 2.5rem;
+  }
+  .set__stage {
+    display: grid;
+    grid-template-columns: 2.75rem minmax(0, 1fr) 2.75rem;
+    align-items: center;
+  }
+  .set__list {
+    grid-column: 2;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    touch-action: pan-y;
+  }
+  .set__item {
+    display: none;
+  }
+  .set__item.is-active {
+    display: block;
+  }
+  figure {
+    margin: 0;
+  }
+  /*
+   * Sized from the known aspect ratio (--ar) so the box is final before the photo loads. The
+   * height budget never drops below 65% of the screen, so a phone held sideways still shows a
+   * usable photo (at the cost of a little scrolling). Mirrors sizesFor() above.
+   */
+  .set__item :global(img) {
+    width: min(100%, calc(max(100svh - 18rem, 65svh) * var(--ar)));
+    height: auto;
+    aspect-ratio: var(--ar);
+    margin: 0 auto;
+  }
+  figcaption {
+    min-height: 1.5em;
+    margin-top: 0.75rem;
+    font-size: 0.875rem;
+    text-align: center;
+    color: var(--muted);
+  }
+  .slideshow__nav {
+    height: 3rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-size: 1.75rem;
+    line-height: 1;
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .slideshow__nav[data-dir='1'] {
+    grid-column: 3;
+  }
+  .slideshow__nav:hover {
+    color: var(--ink);
+  }
+  .slideshow__thumbs {
+    display: flex;
+    justify-content: safe center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding: 0.25rem;
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+  .slideshow__thumb {
+    flex: 0 0 auto;
+    padding: 0;
+    border: 0;
+    background: none;
+    opacity: 0.5;
+    cursor: pointer;
+  }
+  .slideshow__thumb img {
+    width: 3.5rem;
+    height: 3.5rem;
+    object-fit: cover;
+  }
+  .slideshow__thumb.is-active,
+  .slideshow__thumb:hover {
+    opacity: 1;
+  }
+  .slideshow__thumb.is-active {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+  }
+  /* Fade only after the visitor navigates, so the first photo paints immediately. */
+  @media (prefers-reduced-motion: no-preference) {
+    .set.is-navigating .set__item.is-active {
+      animation: fade-in 0.25s ease;
+    }
+  }
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+  }
+</style>
+
+<script>
+  import { enhance } from '../scripts/slideshow';
+
+  document.querySelectorAll<HTMLElement>('[data-slideshow]').forEach(enhance);
+</script>
