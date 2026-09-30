@@ -1,0 +1,35 @@
+{
+  "name": "fasterthanlight",
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview --port 4321",
+    "check": "astro check",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "budgets": "node scripts/check-budgets.mjs",
+    "sync-photos": "tsx --env-file-if-exists=.env scripts/sync-photos.ts",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.4",
+    "astro": "^7.3.5"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@lhci/cli": "^0.15.1",
+    "@playwright/test": "^1.63.0",
+    "cloudinary": "^2.11.0",
+    "prettier": "^3.9.9",
+    "prettier-plugin-astro": "^1.1.0",
+    "tsx": "^4.23.15",
+    "typescript": "^6.0.3",
+    "vitest": "^5.0.2"
+  }
+}
