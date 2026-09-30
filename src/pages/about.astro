@@ -1,0 +1,40 @@
+---
+import Photo from '../components/Photo.astro';
+import { Content } from '../content/about.md';
+import Base from '../layouts/Base.astro';
+import { portrait, site } from '../lib/content';
+---
+
+<Base title="About" description={`About ${site.owner} and ${site.name}.`}>
+  <article class="page about">
+    <Photo
+      photo={portrait}
+      sizes="(min-width: 48rem) 20rem, 100vw"
+      priority
+      class="about__portrait"
+    />
+    <div class="prose">
+      <h1>About</h1>
+      <Content />
+    </div>
+  </article>
+</Base>
+
+<style>
+  .about {
+    display: grid;
+    gap: 2.5rem;
+    align-items: start;
+  }
+  @media (min-width: 48rem) {
+    .about {
+      grid-template-columns: 20rem minmax(0, 1fr);
+    }
+  }
+  h1 {
+    margin: 0 0 1rem;
+    font-size: 2rem;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+  }
+</style>

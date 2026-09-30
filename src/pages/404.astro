@@ -1,0 +1,14 @@
+---
+import Base from '../layouts/Base.astro';
+import { sets } from '../lib/content';
+---
+
+<Base title="Page not found" noindex>
+  <div class="page prose">
+    <h1>Page not found</h1>
+    <p>That page doesn't exist.</p>
+    <p>
+      <a href={`/gallery/${sets[0].slug}`}>Go to the gallery</a>
+    </p>
+  </div>
+</Base>
