@@ -5,6 +5,7 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { v2 as cloudinary } from 'cloudinary';
 import type { PhotosFile } from '../src/lib/schema';
+import { describeError } from './sync/errors';
 import { mergePhotos, syncProblems, type RemotePhoto, type RemoteSet } from './sync/merge';
 
 const ROOT = 'portfolio';
@@ -157,6 +158,7 @@ async function main(): Promise<void> {
 }
 
 main().catch((error: unknown) => {
-  console.error(error instanceof Error ? error.message : error);
+  // Never print the raw error: Cloudinary errors carry the API key and secret.
+  console.error(describeError(error));
   process.exit(1);
 });
