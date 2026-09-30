@@ -2,12 +2,14 @@
 import { site } from '../lib/content';
 
 const year = new Date().getFullYear();
+// One string, so formatting can never drop the spaces between the parts.
+const credit = `© ${year} ${site.name} · ${site.owner} · `;
 ---
 
 <footer class="site-footer">
   <p>
-    © {year}
-    {site.name} · {site.owner} · <a href={`mailto:${site.email}`}>{site.email}</a>
+    {credit}
+    <a href={`mailto:${site.email}`}>{site.email}</a>
   </p>
 </footer>
 

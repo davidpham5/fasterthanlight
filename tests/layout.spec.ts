@@ -19,7 +19,7 @@ test('header shows the wordmark and main navigation', async ({ page }) => {
 test('footer shows copyright and a mailto link', async ({ page }) => {
   await page.goto('/');
   const footer = page.getByRole('contentinfo');
-  await expect(footer).toContainText(`${site.name} · ${site.owner}`);
+  await expect(footer).toContainText(`© ${new Date().getFullYear()} ${site.name} · ${site.owner}`);
   await expect(footer.getByRole('link', { name: site.email })).toHaveAttribute(
     'href',
     `mailto:${site.email}`,
