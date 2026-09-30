@@ -12,62 +12,110 @@ const { set } = Astro.props;
 const count = set.photos.length;
 ---
 
+<!--
+  Rendered in slideshow layout (first photo active) so the script causes no layout shift.
+  Without JavaScript, the <noscript> styles below turn it back into a plain list of every photo.
+-->
 <section class="set" data-slideshow aria-label={set.title}>
   <div class="set__stage">
-    <button class="slideshow__nav" data-dir="-1" type="button" aria-label="Previous photo" hidden>
-      ‹
-    </button>
+    {count > 1 && (
+      <button class="slideshow__nav" data-dir="-1" type="button" aria-label="Previous photo">
+        ‹
+      </button>
+    )}
     <ol class="set__list">
       {set.photos.map((photo, i) => (
-        <li class="set__item">
-          <figure>
+        <li class:list={['set__item', { 'is-active': i === 0 }]}>
+          <figure style={`--ar:${photo.width / photo.height}`}>
             <Photo photo={photo} sizes="(min-width: 64rem) 80vw, 100vw" priority={i === 0} />
             <figcaption>{photo.caption ?? ''}</figcaption>
           </figure>
         </li>
       ))}
     </ol>
-    <button class="slideshow__nav" data-dir="1" type="button" aria-label="Next photo" hidden>
-      ›
-    </button>
+    {count > 1 && (
+      <button class="slideshow__nav" data-dir="1" type="button" aria-label="Next photo">
+        ›
+      </button>
+    )}
   </div>
   <p class="slideshow__status visually-hidden" aria-live="polite"></p>
-  <div class="slideshow__thumbs" hidden>
-    {set.photos.map((photo, i) => (
-      <button
-        class="slideshow__thumb"
-        type="button"
-        data-index={i}
-        aria-label={`Photo ${i + 1} of ${count}`}
-      >
-        <img
-          src={urlFor(site.cloudName, photo.id, 400)}
-          alt=""
-          width="56"
-          height="56"
-          loading="lazy"
-          decoding="async"
-        />
-      </button>
-    ))}
-  </div>
+  {count > 1 && (
+    <div class="slideshow__thumbs">
+      {set.photos.map((photo, i) => (
+        <button
+          class:list={['slideshow__thumb', { 'is-active': i === 0 }]}
+          type="button"
+          data-index={i}
+          aria-label={`Photo ${i + 1} of ${count}`}
+          aria-current={i === 0 ? 'true' : undefined}
+        >
+          <img
+            src={urlFor(site.cloudName, photo.id, 400)}
+            alt=""
+            width="56"
+            height="56"
+            loading="lazy"
+            decoding="async"
+          />
+        </button>
+      ))}
+    </div>
+  )}
+  <noscript>
+    <style is:inline>
+      .set .set__stage {
+        display: block;
+      }
+      .set .set__list {
+        display: grid;
+        gap: 3rem;
+      }
+      .set .set__item {
+        display: block;
+      }
+      .set .set__item img {
+        width: auto;
+        max-width: 100%;
+      }
+      .set .slideshow__nav,
+      .set .slideshow__thumbs {
+        display: none;
+      }
+    </style>
+  </noscript>
 </section>
 
 <style>
   .set {
     padding: 0 var(--gutter) 2.5rem;
   }
-  .set__list {
+  .set__stage {
     display: grid;
-    gap: 3rem;
+    grid-template-columns: 2.75rem minmax(0, 1fr) 2.75rem;
+    align-items: center;
+  }
+  .set__list {
+    grid-column: 2;
     margin: 0;
     padding: 0;
     list-style: none;
+    touch-action: pan-y;
+  }
+  .set__item {
+    display: none;
+  }
+  .set__item.is-active {
+    display: block;
   }
   figure {
     margin: 0;
   }
+  /* Sized from the known aspect ratio (--ar) so the box is final before the photo loads. */
   .set__item :global(img) {
+    width: min(100%, calc((100svh - 18rem) * var(--ar)));
+    height: auto;
+    aspect-ratio: var(--ar);
     margin: 0 auto;
   }
   figcaption {
@@ -76,30 +124,6 @@ const count = set.photos.length;
     font-size: 0.875rem;
     text-align: center;
     color: var(--muted);
-  }
-
-  /* Slideshow mode, switched on by the script (Task 8). */
-  .set.is-enhanced .set__stage {
-    display: grid;
-    grid-template-columns: 2.75rem minmax(0, 1fr) 2.75rem;
-    align-items: center;
-  }
-  .set.is-enhanced .set__list {
-    display: block;
-    touch-action: pan-y;
-  }
-  .set.is-enhanced .set__item {
-    display: none;
-  }
-  .set.is-enhanced .set__item.is-active {
-    display: block;
-  }
-  .set.is-enhanced .set__item :global(img) {
-    width: auto;
-    height: auto;
-    max-width: 100%;
-    max-height: calc(100svh - 18rem);
-    object-fit: contain;
   }
   .slideshow__nav {
     height: 3rem;
@@ -111,6 +135,9 @@ const count = set.photos.length;
     line-height: 1;
     color: var(--muted);
     cursor: pointer;
+  }
+  .slideshow__nav[data-dir='1'] {
+    grid-column: 3;
   }
   .slideshow__nav:hover {
     color: var(--ink);
@@ -145,8 +172,9 @@ const count = set.photos.length;
     outline: 2px solid var(--ink);
     outline-offset: 2px;
   }
+  /* Fade only after the visitor navigates, so the first photo paints immediately. */
   @media (prefers-reduced-motion: no-preference) {
-    .set.is-enhanced .set__item.is-active {
+    .set.is-navigating .set__item.is-active {
       animation: fade-in 0.25s ease;
     }
   }

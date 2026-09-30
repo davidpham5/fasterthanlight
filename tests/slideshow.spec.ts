@@ -129,3 +129,24 @@ test('every set page enhances without console errors', async ({ page }) => {
   }
   expect(errors).toEqual([]);
 });
+
+test('gallery page loads without layout shift', async ({ page }) => {
+  await page.goto(`/gallery/${multi.slug}`);
+  await page.waitForLoadState('load');
+  const cls = await page.evaluate(
+    () =>
+      new Promise<number>((resolve) => {
+        let total = 0;
+        new PerformanceObserver((list) => {
+          for (const entry of list.getEntries() as (PerformanceEntry & {
+            value: number;
+            hadRecentInput: boolean;
+          })[]) {
+            if (!entry.hadRecentInput) total += entry.value;
+          }
+        }).observe({ type: 'layout-shift', buffered: true });
+        setTimeout(() => resolve(total), 500);
+      }),
+  );
+  expect(cls).toBeLessThanOrEqual(0.05);
+});

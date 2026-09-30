@@ -40,6 +40,7 @@ export function enhance(root: HTMLElement): void {
     centerThumb(current);
 
     if (fromUser) {
+      root.classList.add('is-navigating');
       history.replaceState(null, '', hashForIndex(current));
       if (status) {
         const caption = items[current].querySelector('figcaption')?.textContent?.trim();
@@ -48,11 +49,8 @@ export function enhance(root: HTMLElement): void {
     }
   }
 
+  // The server renders photo 1 as active; only a deep link (#n) changes the initial photo.
   root.classList.add('is-enhanced');
-  if (count > 1) {
-    navButtons.forEach((button) => (button.hidden = false));
-    if (thumbStrip) thumbStrip.hidden = false;
-  }
   show(indexFromHash(location.hash, count), false);
 
   navButtons.forEach((button) =>
