@@ -32,7 +32,7 @@ It is a standalone static site. Later it becomes the public-site template for th
   - A Helvetica-style sans serif (a system font stack; no web font download).
   - Generous whitespace, so the photographs dominate.
 - **Header:** "FasterThanLight Studios" as a large plain wordmark on the left, and *Gallery · About · Contact* on the right. The current page is underlined. On small screens the nav collapses into a simple disclosure menu.
-- **Footer:** `© 2026 FasterThanLight Studios · David Pham · hello@fasterthanlight.studio`.
+- **Footer:** `© 2026 FasterThanLight Studios · David Pham · david.pham@hey.com`.
 
 Approved mockups are kept in the `phamtography` repo (`.superpowers/brainstorm/`).
 
@@ -236,7 +236,7 @@ Measured on mobile with a simulated 4G connection, at the 75th percentile, for b
 
 - **Primary domain:** `fasterthanlight.studio`, on Netlify with HTTPS. `www.fasterthanlight.studio` returns a 301 redirect to the apex domain.
 - **Old domains:** `thisismynext.photos` (and the `.photography` domain, if David keeps it) return a 301 redirect to `https://fasterthanlight.studio`, preserving the path.
-- **Email:** `hello@fasterthanlight.studio` forwards to David's inbox. It uses the registrar's forwarding if that is free; otherwise ImprovMX or Cloudflare Email Routing (both have free tiers).
+- **Email:** the site shows `david.pham@hey.com` (changed from `hello@fasterthanlight.studio` on 2026-09-30). Namecheap email forwarding for the domain can stay in place but is no longer advertised.
 
 ## 10. Testing and CI
 
