@@ -1,0 +1,32 @@
+---
+import { defaultWidth, srcsetFor, urlFor } from '../lib/cloudinary';
+import { site } from '../lib/content';
+import type { Photo } from '../lib/schema';
+
+interface Props {
+  photo: Photo;
+  sizes: string;
+  priority?: boolean;
+  class?: string;
+}
+
+const { photo, sizes, priority = false, class: className } = Astro.props;
+// The blurred placeholder sits behind the image and is covered once the (opaque) photo paints.
+const style = photo.placeholder
+  ? `background-image:url(${photo.placeholder});background-size:cover`
+  : undefined;
+---
+
+<img
+  class:list={['photo', className]}
+  src={urlFor(site.cloudName, photo.id, defaultWidth(photo.width))}
+  srcset={srcsetFor(site.cloudName, photo)}
+  sizes={sizes}
+  width={photo.width}
+  height={photo.height}
+  alt={photo.alt}
+  loading={priority ? 'eager' : 'lazy'}
+  fetchpriority={priority ? 'high' : 'auto'}
+  decoding="async"
+  style={style}
+/>
