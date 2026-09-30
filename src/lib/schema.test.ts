@@ -60,9 +60,14 @@ describe('loadContent', () => {
     expect(() => loadContent(site, bad)).toThrow(/slug must be lowercase words joined by hyphens/);
   });
 
-  it('rejects a heroId that is missing from extras', () => {
+  it('resolves a heroId that points at a gallery photo', () => {
+    const content = loadContent({ ...site, heroId: 'a' }, photos);
+    expect(content.hero).toEqual({ id: 'a', width: 3000, height: 2000, alt: 'Speaker on stage' });
+  });
+
+  it('rejects a heroId that is neither an extra nor a gallery photo', () => {
     expect(() => loadContent({ ...site, heroId: 'nope' }, photos)).toThrow(
-      /heroId "nope" is not listed under "extras"/,
+      /heroId "nope" is not a photo in photos.json/,
     );
   });
 

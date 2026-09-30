@@ -75,15 +75,16 @@ export function loadContent(siteRaw: unknown, photosRaw: unknown): Content {
   const site = siteResult.data;
   const { sets, extras } = photosResult.data;
 
+  // The hero and portrait may be an extra (not shown in any gallery) or any gallery photo.
   const extra = (key: 'heroId' | 'portraitId'): Photo => {
     const id = site[key];
-    const found = extras[id];
-    if (!found) {
-      throw new ContentError(
-        `site.json ${key} "${id}" is not listed under "extras" in photos.json`,
-      );
-    }
-    return { id, ...found };
+    const fromExtras = extras[id];
+    if (fromExtras) return { id, ...fromExtras };
+    const fromSets = sets.flatMap((set) => set.photos).find((photo) => photo.id === id);
+    if (fromSets) return fromSets;
+    throw new ContentError(
+      `site.json ${key} "${id}" is not a photo in photos.json (neither an extra nor in any set)`,
+    );
   };
 
   return { site, sets, hero: extra('heroId'), portrait: extra('portraitId') };
