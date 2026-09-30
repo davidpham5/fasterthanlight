@@ -1,0 +1,158 @@
+---
+import Photo from './Photo.astro';
+import { urlFor } from '../lib/cloudinary';
+import { site } from '../lib/content';
+import type { PhotoSet } from '../lib/schema';
+
+interface Props {
+  set: PhotoSet;
+}
+
+const { set } = Astro.props;
+const count = set.photos.length;
+---
+
+<section class="set" data-slideshow aria-label={set.title}>
+  <div class="set__stage">
+    <button class="slideshow__nav" data-dir="-1" type="button" aria-label="Previous photo" hidden>
+      ‹
+    </button>
+    <ol class="set__list">
+      {set.photos.map((photo, i) => (
+        <li class="set__item">
+          <figure>
+            <Photo photo={photo} sizes="(min-width: 64rem) 80vw, 100vw" priority={i === 0} />
+            <figcaption>{photo.caption ?? ''}</figcaption>
+          </figure>
+        </li>
+      ))}
+    </ol>
+    <button class="slideshow__nav" data-dir="1" type="button" aria-label="Next photo" hidden>
+      ›
+    </button>
+  </div>
+  <p class="slideshow__status visually-hidden" aria-live="polite"></p>
+  <div class="slideshow__thumbs" hidden>
+    {set.photos.map((photo, i) => (
+      <button
+        class="slideshow__thumb"
+        type="button"
+        data-index={i}
+        aria-label={`Photo ${i + 1} of ${count}`}
+      >
+        <img
+          src={urlFor(site.cloudName, photo.id, 400)}
+          alt=""
+          width="56"
+          height="56"
+          loading="lazy"
+          decoding="async"
+        />
+      </button>
+    ))}
+  </div>
+</section>
+
+<style>
+  .set {
+    padding: 0 var(--gutter) 2.5rem;
+  }
+  .set__list {
+    display: grid;
+    gap: 3rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  figure {
+    margin: 0;
+  }
+  .set__item :global(img) {
+    margin: 0 auto;
+  }
+  figcaption {
+    min-height: 1.5em;
+    margin-top: 0.75rem;
+    font-size: 0.875rem;
+    text-align: center;
+    color: var(--muted);
+  }
+
+  /* Slideshow mode, switched on by the script (Task 8). */
+  .set.is-enhanced .set__stage {
+    display: grid;
+    grid-template-columns: 2.75rem minmax(0, 1fr) 2.75rem;
+    align-items: center;
+  }
+  .set.is-enhanced .set__list {
+    display: block;
+    touch-action: pan-y;
+  }
+  .set.is-enhanced .set__item {
+    display: none;
+  }
+  .set.is-enhanced .set__item.is-active {
+    display: block;
+  }
+  .set.is-enhanced .set__item :global(img) {
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: calc(100svh - 18rem);
+    object-fit: contain;
+  }
+  .slideshow__nav {
+    height: 3rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-size: 1.75rem;
+    line-height: 1;
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .slideshow__nav:hover {
+    color: var(--ink);
+  }
+  .slideshow__thumbs {
+    display: flex;
+    justify-content: safe center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding: 0.25rem;
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+  .slideshow__thumb {
+    flex: 0 0 auto;
+    padding: 0;
+    border: 0;
+    background: none;
+    opacity: 0.5;
+    cursor: pointer;
+  }
+  .slideshow__thumb img {
+    width: 3.5rem;
+    height: 3.5rem;
+    object-fit: cover;
+  }
+  .slideshow__thumb.is-active,
+  .slideshow__thumb:hover {
+    opacity: 1;
+  }
+  .slideshow__thumb.is-active {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .set.is-enhanced .set__item.is-active {
+      animation: fade-in 0.25s ease;
+    }
+  }
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+  }
+</style>

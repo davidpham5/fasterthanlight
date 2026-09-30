@@ -1,0 +1,48 @@
+---
+import type { PhotoSet } from '../lib/schema';
+
+interface Props {
+  sets: PhotoSet[];
+  current: string;
+}
+
+const { sets, current } = Astro.props;
+---
+
+<nav class="switcher" aria-label="Event types">
+  <ul>
+    {sets.map((set) => (
+      <li>
+        <a href={`/gallery/${set.slug}`} aria-current={set.slug === current ? 'page' : undefined}>
+          {set.title}
+        </a>
+      </li>
+    ))}
+  </ul>
+</nav>
+
+<style>
+  .switcher {
+    padding: 0 var(--gutter) 1.25rem;
+  }
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem 1.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.9375rem;
+  }
+  a {
+    padding-bottom: 2px;
+    color: var(--muted);
+    text-decoration: none;
+  }
+  a[aria-current],
+  a:hover {
+    color: var(--ink);
+    border-bottom: 1px solid currentColor;
+  }
+</style>
