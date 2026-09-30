@@ -156,3 +156,9 @@ const count = set.photos.length;
     }
   }
 </style>
+
+<script>
+  import { enhance } from '../scripts/slideshow';
+
+  document.querySelectorAll<HTMLElement>('[data-slideshow]').forEach(enhance);
+</script>
