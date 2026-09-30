@@ -1,0 +1,20 @@
+# AI crawlers: no training or scraping. © David Pham / FasterThanLight Studios.
+User-agent: GPTBot
+User-agent: ChatGPT-User
+User-agent: ClaudeBot
+User-agent: anthropic-ai
+User-agent: Google-Extended
+User-agent: CCBot
+User-agent: PerplexityBot
+User-agent: Bytespider
+User-agent: Applebot-Extended
+User-agent: meta-externalagent
+User-agent: cohere-ai
+User-agent: Amazonbot
+Disallow: /
+
+# Everyone else (search engines) is welcome.
+User-agent: *
+Allow: /
+
+Sitemap: https://fasterthanlight.studio/sitemap-index.xml
