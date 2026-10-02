@@ -29,6 +29,27 @@ test('footer shows copyright and a mailto link', async ({ page }) => {
 test('every page opts out of AI training', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noai, noimageai');
+  await expect(page.locator('meta[name="tdm-reservation"]')).toHaveAttribute('content', '1');
+  const tdmrep = await page.request.get('/.well-known/tdmrep.json');
+  expect(await tdmrep.json()).toEqual([{ location: '/', 'tdm-reservation': 1 }]);
+});
+
+test('images come from our own domain, so robots.txt and the no-AI headers cover them', async ({
+  page,
+}) => {
+  for (const path of ['/', `/gallery/${firstSet.slug}`, '/about']) {
+    await page.goto(path);
+    const urls = await page
+      .locator('img')
+      .evaluateAll((imgs) =>
+        imgs.flatMap((img) => [
+          (img as HTMLImageElement).src,
+          ...((img as HTMLImageElement).srcset.match(/\S+(?=\s+\d+w)/g) ?? []),
+        ]),
+      );
+    const remote = urls.filter((u) => u && !u.startsWith('data:') && !u.includes('/img/'));
+    expect(remote, path).toEqual([]);
+  }
 });
 
 test('skip link moves focus to the main content', async ({ page }) => {

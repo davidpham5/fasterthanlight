@@ -29,10 +29,13 @@
   for = "/*"
   [headers.values]
     X-Robots-Tag = "noai, noimageai"
+    # EU text-and-data-mining opt-out (TDMRep). Netlify doesn't add these headers to proxied /img
+    # responses; robots.txt and /.well-known/tdmrep.json cover those paths.
+    tdm-reservation = "1"
     Referrer-Policy = "strict-origin-when-cross-origin"
     X-Content-Type-Options = "nosniff"
     Permissions-Policy = "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
-    Content-Security-Policy = "default-src 'self'; img-src 'self' data: https://res.cloudinary.com; script-src 'self'; style-src 'self' 'unsafe-inline'; form-action 'self'; frame-ancestors 'none'; base-uri 'self'; object-src 'none'"
+    Content-Security-Policy = "default-src 'self'; img-src 'self' data:; script-src 'self'; style-src 'self' 'unsafe-inline'; form-action 'self'; frame-ancestors 'none'; base-uri 'self'; object-src 'none'"
 
 [[headers]]
   for = "/_astro/*"

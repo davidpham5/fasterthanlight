@@ -16,7 +16,7 @@ const { title, description = site.description, noindex = false } = Astro.props;
 const fullTitle = title ? `${title} — ${site.name}` : site.name;
 const robots = noindex ? 'noindex, noai, noimageai' : 'noai, noimageai';
 const canonical = new URL(pagePath(Astro.url.pathname), Astro.site).href;
-const ogImage = urlFor(site.cloudName, hero.id, 1600);
+const ogImage = new URL(urlFor(hero.id, 1600), Astro.site).href;
 const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'ProfessionalService',
@@ -37,8 +37,9 @@ const jsonLd = {
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <meta name="robots" content={robots} />
+    <!-- EU text-and-data-mining opt-out (TDMRep); see also /.well-known/tdmrep.json. -->
+    <meta name="tdm-reservation" content="1" />
     <link rel="canonical" href={canonical} />
-    <link rel="preconnect" href="https://res.cloudinary.com" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="sitemap" href="/sitemap-index.xml" />
     <meta property="og:type" content="website" />

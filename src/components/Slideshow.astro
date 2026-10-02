@@ -1,7 +1,6 @@
 ---
 import Photo from './Photo.astro';
 import { urlFor } from '../lib/cloudinary';
-import { site } from '../lib/content';
 import type { PhotoSet } from '../lib/schema';
 
 interface Props {
@@ -58,7 +57,7 @@ const sizesFor = (photo: PhotoSet['photos'][number]) =>
           aria-current={i === 0 ? 'true' : undefined}
         >
           <img
-            src={urlFor(site.cloudName, photo.id, 400)}
+            src={urlFor(photo.id, 400)}
             alt=""
             width="56"
             height="56"
