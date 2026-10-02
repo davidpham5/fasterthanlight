@@ -79,3 +79,24 @@ test('the wordmark and headings use Canela Deck, which actually loads', async ({
   });
   expect(loaded).toBe(true);
 });
+
+test('the nav sits on the same baseline as the wordmark', async ({ page }) => {
+  await page.goto('/about');
+  // An empty inline-block's bottom edge sits exactly on its line's baseline.
+  const baselines = await page.evaluate(() =>
+    ['.wordmark', 'nav a'].map((selector) => {
+      const probe = document.createElement('span');
+      probe.style.display = 'inline-block';
+      document.querySelector(selector)!.append(probe);
+      return probe.getBoundingClientRect().bottom;
+    }),
+  );
+  const [wordmark, nav] = baselines;
+  const wrapped = await page.evaluate(
+    () =>
+      document.querySelector('nav')!.getBoundingClientRect().top >=
+      document.querySelector('.wordmark')!.getBoundingClientRect().bottom,
+  );
+  test.skip(wrapped, 'nav wraps below the wordmark on narrow screens');
+  expect(Math.abs(wordmark - nav)).toBeLessThan(1);
+});
