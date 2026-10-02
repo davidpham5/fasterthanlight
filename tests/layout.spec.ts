@@ -65,3 +65,38 @@ test('the current section is marked in the main navigation', async ({ page }) =>
   await page.goto(`/gallery/${firstSet.slug}`);
   await expect(nav.getByRole('link', { name: 'Gallery' })).toHaveAttribute('aria-current', 'true');
 });
+
+test('the wordmark and headings use Canela Deck, which actually loads', async ({ page }) => {
+  await page.goto('/about');
+  for (const selector of ['.wordmark', 'h1']) {
+    const family = await page.locator(selector).evaluate((el) => getComputedStyle(el).fontFamily);
+    expect(family, selector).toMatch(/^"Canela Deck"/);
+  }
+  await expect(page.locator('body')).not.toHaveCSS('font-family', /Canela/);
+  const loaded = await page.evaluate(async () => {
+    await document.fonts.ready;
+    return document.fonts.check('1rem "Canela Deck"');
+  });
+  expect(loaded).toBe(true);
+});
+
+test('the nav sits on the same baseline as the wordmark', async ({ page }) => {
+  await page.goto('/about');
+  // An empty inline-block's bottom edge sits exactly on its line's baseline.
+  const baselines = await page.evaluate(() =>
+    ['.wordmark', 'nav a'].map((selector) => {
+      const probe = document.createElement('span');
+      probe.style.display = 'inline-block';
+      document.querySelector(selector)!.append(probe);
+      return probe.getBoundingClientRect().bottom;
+    }),
+  );
+  const [wordmark, nav] = baselines;
+  const wrapped = await page.evaluate(
+    () =>
+      document.querySelector('nav')!.getBoundingClientRect().top >=
+      document.querySelector('.wordmark')!.getBoundingClientRect().bottom,
+  );
+  test.skip(wrapped, 'nav wraps below the wordmark on narrow screens');
+  expect(Math.abs(wordmark - nav)).toBeLessThan(1);
+});

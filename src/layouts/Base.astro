@@ -5,6 +5,7 @@ import Header from '../components/Header.astro';
 import { urlFor } from '../lib/cloudinary';
 import { hero, site } from '../lib/content';
 import { pagePath } from '../lib/url';
+import canelaRegular from '../fonts/caneladeck-regular-trial-webfont.woff2?url';
 
 interface Props {
   title?: string;
@@ -40,6 +41,7 @@ const jsonLd = {
     <!-- EU text-and-data-mining opt-out (TDMRep); see also /.well-known/tdmrep.json. -->
     <meta name="tdm-reservation" content="1" />
     <link rel="canonical" href={canonical} />
+    <link rel="preload" href={canelaRegular} as="font" type="font/woff2" crossorigin />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="sitemap" href="/sitemap-index.xml" />
     <meta property="og:type" content="website" />
