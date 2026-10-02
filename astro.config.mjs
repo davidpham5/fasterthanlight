@@ -3,7 +3,7 @@ import sitemap from '@astrojs/sitemap';
 import { defineConfig } from 'astro/config';
 import photos from './src/content/photos.json' with { type: 'json' };
 import site from './src/content/site.json' with { type: 'json' };
-import { IMAGE_PATH, originFor } from './src/lib/cloudinary.ts';
+import { IMAGE_PATH, imageProxyRules, originFor } from './src/lib/cloudinary.ts';
 
 const firstSet = photos.sets[0].slug;
 const imageOrigin = originFor(site.cloudName);
@@ -19,7 +19,8 @@ const imageProxy = {
 
 /** Writes dist/_redirects so Netlify serves /gallery as a real 301. Forced (301!) because Astro
  * also emits dist/gallery/index.html (a meta refresh), which would otherwise shadow the rule.
- * Also proxies /img/* to our Cloudinary account (200 = rewrite, so the URL stays on our domain). */
+ * Also proxies the site's image sizes under /img to Cloudinary (200 = rewrite, so the URL stays on
+ * our domain). */
 function netlifyRedirects() {
   return {
     name: 'netlify-redirects',
@@ -28,7 +29,7 @@ function netlifyRedirects() {
         const rules = [
           `/gallery /gallery/${firstSet} 301!`,
           `/gallery/ /gallery/${firstSet} 301!`,
-          `${IMAGE_PATH}/* ${imageOrigin}/:splat 200!`,
+          ...imageProxyRules(site.cloudName),
         ];
         await writeFile(new URL('_redirects', dir), `${rules.join('\n')}\n`);
       },

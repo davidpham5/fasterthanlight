@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { defaultWidth, originFor, srcsetEntries, srcsetFor, urlFor } from './cloudinary';
+import {
+  defaultWidth,
+  imageProxyRules,
+  originFor,
+  srcsetEntries,
+  srcsetFor,
+  urlFor,
+} from './cloudinary';
 
 describe('urlFor', () => {
   it('builds a same-origin /img URL with auto format/quality and a width limit', () => {
@@ -92,5 +99,16 @@ describe('2560 px long-edge cap (spec §5)', () => {
 describe('originFor', () => {
   it('is the Cloudinary upload base that /img proxies to', () => {
     expect(originFor('demo')).toBe('https://res.cloudinary.com/demo/image/upload');
+  });
+});
+
+describe('imageProxyRules', () => {
+  it('proxies only the four transformations the site uses, never originals', () => {
+    expect(imageProxyRules('demo')).toEqual([
+      '/img/f_auto,q_auto,c_limit,w_400/* https://res.cloudinary.com/demo/image/upload/f_auto,q_auto,c_limit,w_400/:splat 200!',
+      '/img/f_auto,q_auto,c_limit,w_800/* https://res.cloudinary.com/demo/image/upload/f_auto,q_auto,c_limit,w_800/:splat 200!',
+      '/img/f_auto,q_auto,c_limit,w_1600/* https://res.cloudinary.com/demo/image/upload/f_auto,q_auto,c_limit,w_1600/:splat 200!',
+      '/img/f_auto,q_auto,c_limit,w_2560,h_2560/* https://res.cloudinary.com/demo/image/upload/f_auto,q_auto,c_limit,w_2560,h_2560/:splat 200!',
+    ]);
   });
 });

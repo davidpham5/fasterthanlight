@@ -9,7 +9,7 @@ const MAX_EDGE = 2560;
 /** Same-origin path that proxies to {@link originFor}. */
 export const IMAGE_PATH = '/img';
 
-/** Where IMAGE_PATH points: the account's upload base, so only our cloud can be fetched. */
+/** Where IMAGE_PATH points: our account's upload base, so no other cloud can be fetched. */
 export function originFor(cloud: string): string {
   return `https://res.cloudinary.com/${cloud}/image/upload`;
 }
@@ -22,6 +22,17 @@ function encodeId(id: string): string {
 function transformation(width: Width): string {
   const limit = width === MAX_EDGE ? `w_${width},h_${MAX_EDGE}` : `w_${width}`;
   return `f_auto,q_auto,c_limit,${limit}`;
+}
+
+/**
+ * Netlify _redirects rules: one rewrite per transformation, so /img can't fetch originals (which
+ * keep their camera metadata) or any other transformation.
+ */
+export function imageProxyRules(cloud: string): string[] {
+  return WIDTHS.map((width) => {
+    const t = transformation(width);
+    return `${IMAGE_PATH}/${t}/* ${originFor(cloud)}/${t}/:splat 200!`;
+  });
 }
 
 export function urlFor(id: string, width: Width): string {

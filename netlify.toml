@@ -29,7 +29,8 @@
   for = "/*"
   [headers.values]
     X-Robots-Tag = "noai, noimageai"
-    # EU text-and-data-mining opt-out (TDMRep). Covers /img/* too, which proxies to Cloudinary.
+    # EU text-and-data-mining opt-out (TDMRep). Netlify doesn't add these headers to proxied /img
+    # responses; robots.txt and /.well-known/tdmrep.json cover those paths.
     tdm-reservation = "1"
     Referrer-Policy = "strict-origin-when-cross-origin"
     X-Content-Type-Options = "nosniff"
