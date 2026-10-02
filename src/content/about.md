@@ -1,6 +1,6 @@
 <!-- Starter copy — edit freely; it's plain Markdown. -->
 
-FasterThanLight Studios is the photography practice of David Pham. I photograph live events,
+FasterThanLight Studio is the photography practice of David Pham. I photograph live events,
 hospitality and the places they happen in — salon concerts and performances, cocktail bars and
 their craft, venues and their details — along with documentary work from the street. I look for
 the moments between the planned ones: the laugh after the last note, the smoke off a fresh pour,

@@ -1,4 +1,4 @@
-# AI crawlers: no training or scraping. © David Pham / FasterThanLight Studios.
+# AI crawlers: no training or scraping. © David Pham / FasterThanLight Studio.
 User-agent: GPTBot
 User-agent: ChatGPT-User
 User-agent: ClaudeBot

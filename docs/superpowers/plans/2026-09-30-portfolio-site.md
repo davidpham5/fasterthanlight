@@ -1,4 +1,4 @@
-# FasterThanLight Studios Portfolio Site Implementation Plan
+# FasterThanLight Studio Portfolio Site Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
@@ -25,14 +25,14 @@
 - **Node ≥ 22.12 is required by Astro 7. Use Node 24.** The shell default is Node 18, so before running any command: `export PATH="$HOME/.nvm/versions/node/v24.14.0/bin:$PATH"` (verify with `node -v` → `v24.x`). CI and Netlify use `.nvmrc` = `24`.
 - Work on branch `feat/portfolio-site` in `~/Developer/fasterthanlight`. **Never push or open a PR without asking David first.** Pushes deploy to Netlify.
 - End every commit message with the trailer `Co-Authored-By: Claude Opus 5.5 (1M context) <noreply@anthropic.com>`.
-- Site name: `FasterThanLight Studios`. Owner: `David Pham`. Email: `hello@fasterthanlight.studio`. Site URL: `https://fasterthanlight.studio`.
+- Site name: `FasterThanLight Studio`. Owner: `David Pham`. Email: `hello@fasterthanlight.studio`. Site URL: `https://fasterthanlight.studio`.
 - Visual style is "Gallery White": white background, the stack `"Helvetica Neue", Helvetica, Arial, system-ui, sans-serif`, no web fonts, no CSS framework, no UI framework.
 - Cloudinary delivery transform: `f_auto,q_auto,c_limit,w_{400|800|1600|2560}`. **No other widths or transformations** are allowed in delivered URLs, because strict transformations are enabled. The only exception is the sync script's signed placeholder request.
 - JavaScript budget: **0 KB** on `/`, `/about`, `/contact`, `/thanks`, and 404; **≤ 10 KB gzipped** on gallery pages. CSS: **≤ 15 KB gzipped** per page.
 - Lighthouse (mobile) on `/` and a gallery page: Performance ≥ 0.95, Accessibility ≥ 0.95, CLS ≤ 0.05, LCP ≤ 2000 ms. LCP is a warning in CI (network-dependent); the rest are errors.
 - Every photo requires non-empty `alt` text. The build must fail otherwise.
 - Every page carries `<meta name="robots" content="noai, noimageai">`.
-- Photographs are © David Pham / FasterThanLight Studios, all rights reserved. Apache-2.0 covers code only.
+- Photographs are © David Pham / FasterThanLight Studio, all rights reserved. Apache-2.0 covers code only.
 
 ### Deliberate deviations from the spec (approved in plan review)
 
@@ -266,10 +266,10 @@ export default defineConfig({
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>FasterThanLight Studios</title>
+    <title>FasterThanLight Studio</title>
   </head>
   <body>
-    <h1>FasterThanLight Studios</h1>
+    <h1>FasterThanLight Studio</h1>
   </body>
 </html>
 ```
@@ -283,7 +283,7 @@ import { expect, test } from '@playwright/test';
 test('home page responds with the site title', async ({ page }) => {
   const response = await page.goto('/');
   expect(response?.status()).toBe(200);
-  await expect(page).toHaveTitle(/FasterThanLight Studios/);
+  await expect(page).toHaveTitle(/FasterThanLight Studio/);
 });
 ```
 
@@ -296,7 +296,7 @@ Expected: build completes; `2 passed` (desktop + mobile).
 
 `NOTICE`:
 ```
-FasterThanLight Studios — https://fasterthanlight.studio
+FasterThanLight Studio — https://fasterthanlight.studio
 
 The source code in this repository is licensed under the Apache License 2.0
 (see LICENSE).
@@ -304,7 +304,7 @@ The source code in this repository is licensed under the Apache License 2.0
 The photographs shown on the site — including every image delivered from
 Cloudinary and any image data stored in this repository (such as the
 placeholder data in src/content/photos.json) — are © David Pham /
-FasterThanLight Studios. All rights reserved. No license is granted to use,
+FasterThanLight Studio. All rights reserved. No license is granted to use,
 copy, modify, or distribute the photographs, including for training
 machine-learning models.
 ```
@@ -313,13 +313,13 @@ machine-learning models.
 ```markdown
 # fasterthanlight
 
-Portfolio site for **FasterThanLight Studios**, corporate event photography by David Pham:
+Portfolio site for **FasterThanLight Studio**, corporate event photography by David Pham:
 https://fasterthanlight.studio
 
 ## Licensing
 
 - **Code:** Apache License 2.0 (see `LICENSE`).
-- **Photographs:** © David Pham / FasterThanLight Studios. All rights reserved. The Apache
+- **Photographs:** © David Pham / FasterThanLight Studio. All rights reserved. The Apache
   license does **not** apply to the photographs. See `NOTICE`.
 
 ## Development
@@ -376,7 +376,7 @@ import { describe, expect, it } from 'vitest';
 import { loadContent } from './schema';
 
 const site = {
-  name: 'FasterThanLight Studios',
+  name: 'FasterThanLight Studio',
   owner: 'David Pham',
   tagline: 'Corporate events, photographed like they matter.',
   description: 'Corporate event photography by David Pham.',
@@ -559,7 +559,7 @@ This seed content uses Cloudinary's public `demo` account until David's photos a
 `src/content/site.json`:
 ```json
 {
-  "name": "FasterThanLight Studios",
+  "name": "FasterThanLight Studio",
   "owner": "David Pham",
   "tagline": "Corporate events, photographed like they matter.",
   "description": "Corporate event photography by David Pham — conferences, galas, product launches and on-site headshots.",
@@ -723,7 +723,7 @@ Add a temporary import to prove the loader runs at build time. Edit `src/pages/i
 import { site } from '../lib/content';
 ---
 ```
-and change `<title>FasterThanLight Studios</title>` to `<title>{site.name}</title>`.
+and change `<title>FasterThanLight Studio</title>` to `<title>{site.name}</title>`.
 
 Run: `npm run build && npx playwright test tests/smoke.spec.ts`
 Expected: build succeeds; `2 passed`.
@@ -1473,7 +1473,7 @@ test('set switcher links every set and marks the current one', async ({ page }) 
     'aria-current',
     'page',
   );
-  await expect(page).toHaveTitle(`${firstSet.title} — FasterThanLight Studios`);
+  await expect(page).toHaveTitle(`${firstSet.title} — FasterThanLight Studio`);
 });
 
 test('/gallery redirects to the first set', async ({ page }) => {
@@ -2284,7 +2284,7 @@ Expected: FAIL — `/about` returns 404.
 ```markdown
 <!-- Starter copy — replace with your own words before launch. -->
 
-FasterThanLight Studios is the corporate event photography practice of David Pham. I photograph
+FasterThanLight Studio is the corporate event photography practice of David Pham. I photograph
 conferences, galas, product launches and on-site headshots for event, marketing and
 communications teams who need images that are ready for the press release, the recap deck and
 the social feed.
@@ -2663,7 +2663,7 @@ const jsonLd = {
 
 `public/robots.txt`:
 ```
-# AI crawlers: no training or scraping. © David Pham / FasterThanLight Studios.
+# AI crawlers: no training or scraping. © David Pham / FasterThanLight Studio.
 User-agent: GPTBot
 User-agent: ChatGPT-User
 User-agent: ClaudeBot
@@ -3348,7 +3348,7 @@ Then **ask David**: "Everything passes locally. OK to push `feat/portfolio-site`
 On approval:
 ```bash
 git push -u origin feat/portfolio-site
-gh pr create --title "Portfolio site: FasterThanLight Studios" --body "$(cat <<'EOF'
+gh pr create --title "Portfolio site: FasterThanLight Studio" --body "$(cat <<'EOF'
 Builds the portfolio site from docs/superpowers/specs/2026-09-30-portfolio-site-design.md.
 
 - Astro 7 static site with a Gallery White slideshow per event type

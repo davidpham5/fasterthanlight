@@ -1,4 +1,4 @@
-# FasterThanLight Studios Portfolio Site: Design Spec
+# FasterThanLight Studio Portfolio Site: Design Spec
 
 - **Date:** 2026-09-30
 - **Status:** Draft for review
@@ -7,7 +7,7 @@
 
 ## 1. Purpose
 
-This is the portfolio site for **FasterThanLight Studios**, David Pham's corporate-event photography business.
+This is the portfolio site for **FasterThanLight Studio**, David Pham's corporate-event photography business.
 
 **Audience:** corporate event planners and marketing or communications teams.
 
@@ -31,8 +31,8 @@ It is a standalone static site. Later it becomes the public-site template for th
   - A white background.
   - A Helvetica-style sans serif (a system font stack; no web font download).
   - Generous whitespace, so the photographs dominate.
-- **Header:** "FasterThanLight Studios" as a large plain wordmark on the left, and *Gallery · About · Contact* on the right. The current page is underlined. On small screens the nav collapses into a simple disclosure menu.
-- **Footer:** `© 2026 FasterThanLight Studios · David Pham · david.pham@hey.com`.
+- **Header:** "FasterThanLight Studio" as a large plain wordmark on the left, and *Gallery · About · Contact* on the right. The current page is underlined. On small screens the nav collapses into a simple disclosure menu.
+- **Footer:** `© 2026 FasterThanLight Studio · David Pham · david.pham@hey.com`.
 
 Approved mockups are kept in the `phamtography` repo (`.superpowers/brainstorm/`).
 
@@ -102,7 +102,7 @@ NOTICE
 ### Content files (validated at build time; a build fails if they're invalid)
 
 **`site.json`** holds:
-- `name` ("FasterThanLight Studios")
+- `name` ("FasterThanLight Studio")
 - `owner` ("David Pham")
 - `tagline`, the homepage line
 - `email`
@@ -215,7 +215,7 @@ Measured on mobile with a simulated 4G connection, at the 75th percentile, for b
 
 ## 8. Protection, licensing and SEO
 
-- **Licensing:** the README and a `NOTICE` file state that **Apache 2.0 covers the source code only**, and that **all photographs are © David Pham / FasterThanLight Studios, all rights reserved**, with no license granted.
+- **Licensing:** the README and a `NOTICE` file state that **Apache 2.0 covers the source code only**, and that **all photographs are © David Pham / FasterThanLight Studio, all rights reserved**, with no license granted.
 - **AI scraping defenses:**
   - `robots.txt` disallows known AI crawlers, including GPTBot, ClaudeBot, Google-Extended, CCBot, PerplexityBot, Bytespider, and Applebot-Extended.
   - Every page carries `<meta name="robots" content="noai, noimageai">`.

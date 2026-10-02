@@ -48,7 +48,7 @@ test('set switcher links every set and marks the current one', async ({ page }) 
     'aria-current',
     'page',
   );
-  await expect(page).toHaveTitle(`${firstSet.title} — FasterThanLight Studios`);
+  await expect(page).toHaveTitle(`${firstSet.title} — FasterThanLight Studio`);
 });
 
 test('/gallery redirects to the first set', async ({ page }) => {
