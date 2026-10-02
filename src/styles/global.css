@@ -1,5 +1,32 @@
+/* Canela Deck (Commercial Type) for the wordmark and headings. Characters it lacks (&, ·, ©, é)
+   fall back to Georgia, which sits closer to it than Helvetica does. */
+@font-face {
+  font-family: 'Canela Deck';
+  src: url('../fonts/caneladeck-regular-trial-webfont.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Canela Deck';
+  src: url('../fonts/caneladeck-regularitalic-webfont.woff2') format('woff2');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Canela Deck';
+  src: url('../fonts/caneladeck-bold-webfont.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --font: 'Helvetica Neue', Helvetica, Arial, system-ui, sans-serif;
+  --font-display: 'Canela Deck', Georgia, 'Times New Roman', serif;
   --ink: #111;
   --muted: #555;
   --line: #e6e6e6;
@@ -41,6 +68,13 @@ img {
 
 a {
   color: inherit;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: 400;
 }
 
 [hidden] {
@@ -91,5 +125,4 @@ a {
 .prose h2 {
   margin: 2rem 0 0.5rem;
   font-size: 1.25rem;
-  font-weight: 500;
 }

@@ -65,3 +65,17 @@ test('the current section is marked in the main navigation', async ({ page }) =>
   await page.goto(`/gallery/${firstSet.slug}`);
   await expect(nav.getByRole('link', { name: 'Gallery' })).toHaveAttribute('aria-current', 'true');
 });
+
+test('the wordmark and headings use Canela Deck, which actually loads', async ({ page }) => {
+  await page.goto('/about');
+  for (const selector of ['.wordmark', 'h1']) {
+    const family = await page.locator(selector).evaluate((el) => getComputedStyle(el).fontFamily);
+    expect(family, selector).toMatch(/^"Canela Deck"/);
+  }
+  await expect(page.locator('body')).not.toHaveCSS('font-family', /Canela/);
+  const loaded = await page.evaluate(async () => {
+    await document.fonts.ready;
+    return document.fonts.check('1rem "Canela Deck"');
+  });
+  expect(loaded).toBe(true);
+});
