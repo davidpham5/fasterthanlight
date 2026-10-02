@@ -1,16 +1,16 @@
 import { describe, expect, it } from 'vitest';
-import { defaultWidth, srcsetEntries, srcsetFor, urlFor } from './cloudinary';
+import { defaultWidth, originFor, srcsetEntries, srcsetFor, urlFor } from './cloudinary';
 
 describe('urlFor', () => {
-  it('builds a delivery URL with auto format/quality and a width limit', () => {
-    expect(urlFor('demo', 'samples/people/jazz', 800)).toBe(
-      'https://res.cloudinary.com/demo/image/upload/f_auto,q_auto,c_limit,w_800/samples/people/jazz',
+  it('builds a same-origin /img URL with auto format/quality and a width limit', () => {
+    expect(urlFor('samples/people/jazz', 800)).toBe(
+      '/img/f_auto,q_auto,c_limit,w_800/samples/people/jazz',
     );
   });
 
   it('URL-encodes each segment of a public id with spaces or #', () => {
-    expect(urlFor('demo', 'portfolio/galas/Award Night #1', 400)).toBe(
-      'https://res.cloudinary.com/demo/image/upload/f_auto,q_auto,c_limit,w_400/portfolio/galas/Award%20Night%20%231',
+    expect(urlFor('portfolio/galas/Award Night #1', 400)).toBe(
+      '/img/f_auto,q_auto,c_limit,w_400/portfolio/galas/Award%20Night%20%231',
     );
   });
 });
@@ -47,11 +47,11 @@ describe('srcsetEntries', () => {
 
 describe('srcsetFor', () => {
   it('joins entries into a srcset string', () => {
-    expect(srcsetFor('demo', { id: 'woman', width: 1000 })).toBe(
+    expect(srcsetFor({ id: 'woman', width: 1000 })).toBe(
       [
-        'https://res.cloudinary.com/demo/image/upload/f_auto,q_auto,c_limit,w_400/woman 400w',
-        'https://res.cloudinary.com/demo/image/upload/f_auto,q_auto,c_limit,w_800/woman 800w',
-        'https://res.cloudinary.com/demo/image/upload/f_auto,q_auto,c_limit,w_1600/woman 1000w',
+        '/img/f_auto,q_auto,c_limit,w_400/woman 400w',
+        '/img/f_auto,q_auto,c_limit,w_800/woman 800w',
+        '/img/f_auto,q_auto,c_limit,w_1600/woman 1000w',
       ].join(', '),
     );
   });
@@ -68,9 +68,7 @@ describe('defaultWidth', () => {
 
 describe('2560 px long-edge cap (spec §5)', () => {
   it('limits both width and height on the largest size', () => {
-    expect(urlFor('demo', 'tall', 2560)).toBe(
-      'https://res.cloudinary.com/demo/image/upload/f_auto,q_auto,c_limit,w_2560,h_2560/tall',
-    );
+    expect(urlFor('tall', 2560)).toBe('/img/f_auto,q_auto,c_limit,w_2560,h_2560/tall');
   });
 
   it('describes a height-capped portrait by its delivered width', () => {
@@ -88,5 +86,11 @@ describe('2560 px long-edge cap (spec §5)', () => {
       { width: 800, descriptor: 800 },
       { width: 1600, descriptor: 1600 },
     ]);
+  });
+});
+
+describe('originFor', () => {
+  it('is the Cloudinary upload base that /img proxies to', () => {
+    expect(originFor('demo')).toBe('https://res.cloudinary.com/demo/image/upload');
   });
 });

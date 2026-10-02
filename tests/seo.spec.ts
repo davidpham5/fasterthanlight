@@ -19,11 +19,11 @@ test('each page has a unique title and description and a canonical URL', async (
   expect(descriptions.size).toBe(routes.length);
 });
 
-test('social cards use the hero image from Cloudinary', async ({ page }) => {
+test('social cards use the hero image, served from our own domain', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
     'content',
-    new RegExp(`/${site.cloudName}/image/upload/f_auto,q_auto,c_limit,w_1600/`),
+    `${ORIGIN}/img/f_auto,q_auto,c_limit,w_1600/${site.heroId}`,
   );
   await expect(page.locator('meta[property="og:site_name"]')).toHaveAttribute('content', site.name);
   await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute(
@@ -62,7 +62,8 @@ test('sitemap lists real pages but not thanks or the redirect', () => {
 test('netlify.toml sets the protective headers and domain redirects', () => {
   const toml = readFileSync('netlify.toml', 'utf8');
   expect(toml).toContain('X-Robots-Tag = "noai, noimageai"');
-  expect(toml).toContain("img-src 'self' data: https://res.cloudinary.com");
+  expect(toml).toContain('tdm-reservation = "1"');
+  expect(toml).toContain("img-src 'self' data:;");
   expect(toml).toContain("script-src 'self'");
   expect(toml).toContain('from = "https://thisismynext.photos/*"');
 });

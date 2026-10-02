@@ -1,6 +1,5 @@
 ---
 import { defaultWidth, srcsetFor, urlFor } from '../lib/cloudinary';
-import { site } from '../lib/content';
 import type { Photo } from '../lib/schema';
 
 interface Props {
@@ -19,8 +18,8 @@ const style = photo.placeholder
 
 <img
   class:list={['photo', className]}
-  src={urlFor(site.cloudName, photo.id, defaultWidth(photo.width))}
-  srcset={srcsetFor(site.cloudName, photo)}
+  src={urlFor(photo.id, defaultWidth(photo.width))}
+  srcset={srcsetFor(photo)}
   sizes={sizes}
   width={photo.width}
   height={photo.height}

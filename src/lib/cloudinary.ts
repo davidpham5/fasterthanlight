@@ -1,10 +1,18 @@
 // The only Cloudinary-specific module. To move images to another host, replace this file.
+// Images are requested from /img on our own domain, which Netlify (and the dev/preview server)
+// proxies to Cloudinary, so robots.txt and the no-AI headers cover the image files too.
 export type Width = 400 | 800 | 1600 | 2560;
 export const WIDTHS: readonly Width[] = [400, 800, 1600, 2560];
 
 /** Delivered images never exceed this on their long edge (spec §5). */
 const MAX_EDGE = 2560;
-const BASE = 'https://res.cloudinary.com';
+/** Same-origin path that proxies to {@link originFor}. */
+export const IMAGE_PATH = '/img';
+
+/** Where IMAGE_PATH points: the account's upload base, so only our cloud can be fetched. */
+export function originFor(cloud: string): string {
+  return `https://res.cloudinary.com/${cloud}/image/upload`;
+}
 
 function encodeId(id: string): string {
   return id.split('/').map(encodeURIComponent).join('/');
@@ -16,8 +24,8 @@ function transformation(width: Width): string {
   return `f_auto,q_auto,c_limit,${limit}`;
 }
 
-export function urlFor(cloud: string, id: string, width: Width): string {
-  return `${BASE}/${cloud}/image/upload/${transformation(width)}/${encodeId(id)}`;
+export function urlFor(id: string, width: Width): string {
+  return `${IMAGE_PATH}/${transformation(width)}/${encodeId(id)}`;
 }
 
 /** Width Cloudinary actually delivers: c_limit never upscales and keeps the aspect ratio. */
@@ -46,12 +54,9 @@ export function srcsetEntries(
   return entries;
 }
 
-export function srcsetFor(
-  cloud: string,
-  photo: { id: string; width: number; height?: number },
-): string {
+export function srcsetFor(photo: { id: string; width: number; height?: number }): string {
   return srcsetEntries(photo.width, photo.height)
-    .map(({ width, descriptor }) => `${urlFor(cloud, photo.id, width)} ${descriptor}w`)
+    .map(({ width, descriptor }) => `${urlFor(photo.id, width)} ${descriptor}w`)
     .join(', ');
 }
 
