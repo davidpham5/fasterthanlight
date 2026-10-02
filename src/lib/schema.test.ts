@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { loadContent } from './schema';
 
 const site = {
-  name: 'FasterThanLight Studios',
+  name: 'FasterThanLight Studio',
   owner: 'David Pham',
   tagline: 'Corporate events, photographed like they matter.',
   description: 'Corporate event photography by David Pham.',

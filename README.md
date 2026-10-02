@@ -1,12 +1,12 @@
 # fasterthanlight
 
-Portfolio site for **FasterThanLight Studios**, event, hospitality and documentary photography by David Pham:
+Portfolio site for **FasterThanLight Studio**, event, hospitality and documentary photography by David Pham:
 https://fasterthanlight.studio
 
 ## Licensing
 
 - **Code:** Apache License 2.0 (see `LICENSE`).
-- **Photographs:** © David Pham / FasterThanLight Studios. All rights reserved. The Apache
+- **Photographs:** © David Pham / FasterThanLight Studio. All rights reserved. The Apache
   license does **not** apply to the photographs. See `NOTICE`.
 
 ## Development
