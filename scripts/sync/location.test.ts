@@ -78,7 +78,7 @@ describe('locationVerdict', () => {
   it('holds back any other format with location, and says what to do', () => {
     const verdict = locationVerdict({ GPSLatitude: '1' }, 'heic');
     expect(verdict).toMatchObject({ action: 'hold', fields: ['GPSLatitude'] });
-    expect(verdict.action === 'hold' && verdict.reason).toMatch(/HEIC.*re-export it as a JPEG/);
+    expect(verdict.action === 'hold' && verdict.reason).toMatch(/HEIC.*re-export it as a JPEG/i);
   });
 
   it('keeps any format without location', () => {

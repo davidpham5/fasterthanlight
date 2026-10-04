@@ -56,7 +56,7 @@ export function locationVerdict(meta: Metadata, format: string): Verdict {
     fields,
     reason:
       `has location data (${fields.join(', ')}) but is a ${format.toUpperCase()}, and only ` +
-      'JPEGs are cleaned automatically. re-export it as a JPEG without location.',
+      'JPEGs are cleaned automatically. Re-export it as a JPEG without location.',
   };
 }
 
