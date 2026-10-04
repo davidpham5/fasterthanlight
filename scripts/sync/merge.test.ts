@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { PhotosFile } from '../../src/lib/schema';
-import { mergePhotos, syncProblems, titleFromSlug, type RemoteSet } from './merge';
+import { knownIds, mergePhotos, syncProblems, titleFromSlug, type RemoteSet } from './merge';
 
 const existing: PhotosFile = {
   sets: [
@@ -133,5 +133,11 @@ describe('syncProblems', () => {
   it('refuses to write when more than half the photos would be removed', () => {
     const { data, report } = mergePhotos(before, [{ slug: 'a', photos: [photo('1')] }], []);
     expect(syncProblems(before, data, report)).toEqual(['This sync would remove 3 of 4 photos.']);
+  });
+});
+
+describe('knownIds', () => {
+  it('lists every photo already on the site, in sets and extras', () => {
+    expect(knownIds(existing)).toEqual(new Set(['c2', 'c1', 'r1', 'hero']));
   });
 });
