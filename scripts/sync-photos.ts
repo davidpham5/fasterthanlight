@@ -187,6 +187,9 @@ async function syncPortfolio(workDir: string): Promise<void> {
   remoteSets = remoteSets.map((set) => ({ ...set, photos: set.photos.filter(notHeld) }));
   remoteExtras = remoteExtras.filter(notHeld);
 
+  // Printed before the refusal check below: Cloudinary has already been changed by this point.
+  printProtection(protection, 'were held back and not added to the site');
+
   const { data, report } = mergePhotos(existing, remoteSets, remoteExtras);
   const problems = syncProblems(existing, data, report);
   if (problems.length > 0 && !force) {
@@ -216,7 +219,6 @@ async function syncPortfolio(workDir: string): Promise<void> {
         ` in Cloudinary (then re-sync) or directly in photos.json:\n  ${report.missingAlt.join('\n  ')}`,
     );
   }
-  printProtection(protection, 'were held back and not added to the site');
   console.log('\nReview with: git diff src/content/photos.json');
 }
 

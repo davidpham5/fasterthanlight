@@ -103,13 +103,28 @@ describe('protectPhoto', () => {
   it('an upload error is reported without credentials', async () => {
     const deps = fakeDeps(resource({ City: 'Brooklyn' }));
     deps.upload.mockRejectedValueOnce({
-      error: { message: 'Invalid Signature', http_code: 401 },
+      message: 'Invalid Signature',
+      http_code: 401,
       request_options: { auth: { api_key: 'KEY123', api_secret: 'SECRET456' } },
     });
     const result = await protectPhoto(ID, deps, dir);
     expect(result).toEqual({
       status: 'held',
       reason: 'could not be checked or cleaned: Cloudinary API error 401: Invalid Signature',
+    });
+    expect(JSON.stringify(result)).not.toMatch(/KEY123|SECRET456/);
+  });
+
+  it('an Admin API error is reported without credentials', async () => {
+    const deps = fakeDeps(resource({ City: 'Brooklyn' }));
+    deps.fetchResource.mockRejectedValueOnce({
+      error: { message: 'Resource not found', http_code: 404 },
+      request_options: { auth: { api_key: 'KEY123', api_secret: 'SECRET456' } },
+    });
+    const result = await protectPhoto(ID, deps, dir);
+    expect(result).toEqual({
+      status: 'held',
+      reason: 'could not be checked or cleaned: Cloudinary API error 404: Resource not found',
     });
     expect(JSON.stringify(result)).not.toMatch(/KEY123|SECRET456/);
   });

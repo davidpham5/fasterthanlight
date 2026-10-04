@@ -1,12 +1,13 @@
 import { copyFile, mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { exiftool } from 'exiftool-vendored';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { locationFields, type Metadata } from './location';
 import { endExiftool, stripLocation } from './strip';
 
-const FIXTURE = new URL('./fixtures/plain.jpg', import.meta.url).pathname;
+const FIXTURE = fileURLToPath(new URL('./fixtures/plain.jpg', import.meta.url));
 let dir: string;
 
 beforeAll(async () => {
@@ -33,7 +34,14 @@ async function locatedCopy(name: string): Promise<string> {
       GPSLongitudeRef: 'W',
       'IPTC:City': 'Brooklyn',
       'IPTC:Sub-location': 'Park Slope',
+      'IPTC:Province-State': 'New York',
+      'IPTC:Country-PrimaryLocationName': 'United States',
       'XMP-photoshop:City': 'Brooklyn',
+      'XMP-photoshop:State': 'New York',
+      'XMP-photoshop:Country': 'United States',
+      'XMP-iptcCore:Location': 'Park Slope',
+      'XMP-iptcCore:CountryCode': 'US',
+      'XMP-iptcExt:LocationCreated': [{ City: 'Brooklyn' }],
     } as never,
     { writeArgs: ['-overwrite_original'] },
   );
@@ -68,7 +76,7 @@ describe('stripLocation', () => {
 
   it('rejects a file that is not an image', { timeout: 30_000 }, async () => {
     const path = join(dir, 'not-an-image.jpg');
-    await copyFile(new URL(import.meta.url).pathname, path);
+    await copyFile(fileURLToPath(import.meta.url), path);
     await expect(stripLocation(path)).rejects.toThrow();
   });
 });

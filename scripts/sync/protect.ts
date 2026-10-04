@@ -113,7 +113,7 @@ export function cloudinaryDeps(): ProtectDeps {
         tags: true,
       })) as CloudResource,
     download: async (url, path) => {
-      const res = await fetch(url);
+      const res = await fetch(url, { signal: AbortSignal.timeout(60_000) });
       if (!res.ok) throw new Error(`downloading the original failed: HTTP ${res.status}`);
       await writeFile(path, Buffer.from(await res.arrayBuffer()));
     },
@@ -121,6 +121,8 @@ export function cloudinaryDeps(): ProtectDeps {
     upload: async (path, { publicId, assetFolder, context, tags }) => {
       await cloudinary.uploader.upload(path, {
         public_id: publicId,
+        // Keeps original_filename as the photo's name, not the temp file's.
+        filename_override: publicId.split('/').pop(),
         ...(assetFolder ? { asset_folder: assetFolder } : {}),
         overwrite: true,
         invalidate: true,
