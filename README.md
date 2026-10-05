@@ -39,10 +39,17 @@ Requires Node 24 (`.nvmrc`).
 ## Photo Log
 
 1. Upload a post's photos to Cloudinary folder `photo-log/<name>/` (or `photo-log/YYYY-MM-DD-<name>/`)
-   in the order they should appear. `<name>` becomes the address: `/photo-log/<name>`.
+   `<name>` becomes the address: `/photo-log/<name>`. Photos appear in upload order, and photos
+   uploaded in the same second are ordered by capture time. Reorder the lines in the file freely.
 2. `npm run sync-photos` creates `src/content/photo-log/<name>.md` as a draft.
 3. Edit it: title, date, a line or two of text below the `---`, alt text for every photo, optional
    `caption:`, and camera fixes (`camera:`, `lens:`, `focal:`, `aperture:`, `shutter:`, `iso:`: numbers
    get units, text shows as written, `""` hides). Delete or reorder photo lines freely.
 4. Remove `draft: true` to publish. Re-syncs add new uploads and remove deleted ones, and never touch
    anything else in the file.
+
+`--force` skips the uncommitted-changes check and the portfolio's safety refusals, so commit your
+edits instead of using it.
+
+CI's Lighthouse run checks `/photo-log`, so keep at least one post published (or remove that URL
+from `lighthouserc.json`).
