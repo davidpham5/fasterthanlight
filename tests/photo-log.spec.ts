@@ -104,6 +104,20 @@ test.describe('with published posts', () => {
     expect(cls).toBeLessThanOrEqual(0.05);
   });
 
+  test('the RSS feed has one item per published post, with absolute image URLs', async ({
+    request,
+  }) => {
+    const res = await request.get('/photo-log/rss.xml');
+    expect(res.ok()).toBe(true);
+    const xml = await res.text();
+    expect(xml.startsWith('<?xml')).toBe(true);
+    expect(xml.match(/<item>/g)).toHaveLength(logPosts.length);
+    expect(xml).toContain(`<link>${ORIGIN}/photo-log/${latest.slug}/</link>`);
+    expect(xml).toContain(
+      `${ORIGIN}/img/f_auto,q_auto,c_limit,w_1600/${latest.photos[0].publicId}`,
+    );
+  });
+
   test.describe('without JavaScript', () => {
     test.use({ javaScriptEnabled: false });
     test('each photo links to its 1600px image', async ({ page }) => {
