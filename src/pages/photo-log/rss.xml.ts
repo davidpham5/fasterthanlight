@@ -22,5 +22,7 @@ export async function GET(context: APIContext) {
       };
     }),
     customData: '<language>en</language>',
+    // Site pages are slash-less (build.format 'file'), so links must match.
+    trailingSlash: false,
   });
 }

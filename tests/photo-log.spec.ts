@@ -112,7 +112,7 @@ test.describe('with published posts', () => {
     const xml = await res.text();
     expect(xml.startsWith('<?xml')).toBe(true);
     expect(xml.match(/<item>/g)).toHaveLength(logPosts.length);
-    expect(xml).toContain(`<link>${ORIGIN}/photo-log/${latest.slug}/</link>`);
+    expect(xml).toContain(`<link>${ORIGIN}/photo-log/${latest.slug}</link>`);
     expect(xml).toContain(
       `${ORIGIN}/img/f_auto,q_auto,c_limit,w_1600/${latest.photos[0].publicId}`,
     );
