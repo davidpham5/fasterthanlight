@@ -51,9 +51,11 @@ function positive(value?: string): number | undefined {
 }
 
 const oneDecimal = (n: number) => String(Math.round(n * 10) / 10);
+// Trim trailing zeros after rounding to 2 decimals.
+const twoDecimals = (n: number) => String(Math.round(n * 100) / 100).replace(/\.?0+$/, '');
 const units = {
   focal: (n: number) => `${oneDecimal(n)}mm`,
-  aperture: (n: number) => `f/${oneDecimal(n)}`,
+  aperture: (n: number) => `f/${twoDecimals(n)}`,
   shutter: (n: number) => `${n}s`,
   iso: (n: number) => `ISO ${Math.round(n)}`,
 };

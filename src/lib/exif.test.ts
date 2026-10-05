@@ -46,6 +46,8 @@ describe('cameraLine', () => {
     expect(cameraLine({ focal: '58.0 mm' })).toBe('58mm');
     expect(cameraLine({ focal: '4.2 mm' })).toBe('4.2mm');
     expect(cameraLine({ aperture: '2.0' })).toBe('f/2');
+    expect(cameraLine({ aperture: '0.95' })).toBe('f/0.95');
+    expect(cameraLine({ aperture: '1.25' })).toBe('f/1.25');
     expect(cameraLine({ shutter: '0.5' })).toBe('0.5s');
     expect(cameraLine({ shutter: '2' })).toBe('2s');
   });
