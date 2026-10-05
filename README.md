@@ -35,3 +35,14 @@ Requires Node 24 (`.nvmrc`).
 6. `npm run sync-photos -- --audit-location` checks every photo already on the site the same way
    (one or two Cloudinary Admin API calls per photo, two when it cleans one). It cleans what it
    can and lists anything to replace; it never removes photos from the site.
+
+## Photo Log
+
+1. Upload a post's photos to Cloudinary folder `photo-log/<name>/` (or `photo-log/YYYY-MM-DD-<name>/`)
+   in the order they should appear. `<name>` becomes the address: `/photo-log/<name>`.
+2. `npm run sync-photos` creates `src/content/photo-log/<name>.md` as a draft.
+3. Edit it: title, date, a line or two of text below the `---`, alt text for every photo, optional
+   `caption:`, and camera fixes (`camera:`, `lens:`, `focal:`, `aperture:`, `shutter:`, `iso:`: numbers
+   get units, text shows as written, `""` hides). Delete or reorder photo lines freely.
+4. Remove `draft: true` to publish. Re-syncs add new uploads and remove deleted ones, and never touch
+   anything else in the file.

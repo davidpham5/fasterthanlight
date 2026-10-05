@@ -7,6 +7,8 @@ export interface RemotePhoto {
   alt?: string;
   caption?: string;
   placeholder?: string;
+  /** Cloudinary's created_at; orders new Photo Log photos by upload time. */
+  uploadedAt?: string;
 }
 
 export interface RemoteSet {
