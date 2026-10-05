@@ -18,7 +18,9 @@ test('internal links resolve without a trailing-slash redirect', () => {
   const hrefs = new Set<string>();
   for (const file of htmlFiles(DIST)) {
     for (const [, href] of readFileSync(file, 'utf8').matchAll(/href="(\/[^"#?]*)"/g)) {
-      if (!href.startsWith('/_astro/') && !/\.[a-z0-9]+$/i.test(href)) hrefs.add(href);
+      // /img/... is the image proxy, not a page: it has no file in dist and never redirects.
+      if (!href.startsWith('/_astro/') && !href.startsWith('/img/') && !/\.[a-z0-9]+$/i.test(href))
+        hrefs.add(href);
     }
   }
   const redirecting = [...hrefs].filter((href) => {

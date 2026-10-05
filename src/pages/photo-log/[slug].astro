@@ -1,0 +1,58 @@
+---
+import type { GetStaticPaths } from 'astro';
+import LogPost from '../../components/LogPost.astro';
+import Base from '../../layouts/Base.astro';
+import { urlFor } from '../../lib/cloudinary';
+import { site } from '../../lib/content';
+import { publishedPosts, type Post } from '../../lib/log-posts';
+import { excerpt, neighbours } from '../../lib/photo-log';
+
+export const getStaticPaths = (async () => {
+  const posts = await publishedPosts();
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: { post, ...neighbours(posts, post.slug) },
+  }));
+}) satisfies GetStaticPaths;
+
+interface Props {
+  post: Post;
+  newer?: Post;
+  older?: Post;
+}
+
+const { post, newer, older } = Astro.props;
+const cover = post.photos[0];
+---
+
+<Base
+  title={post.title}
+  description={excerpt(post.entry.rendered?.html ?? '', post.title)}
+  ogType="article"
+  ogImage={{ path: urlFor(cover.id, 1600), alt: cover.alt }}
+>
+  <link
+    slot="head"
+    rel="alternate"
+    type="application/rss+xml"
+    title={`Photo Log — ${site.name}`}
+    href="/photo-log/rss.xml"
+  />
+  <div class="log page">
+    <LogPost post={post} heading="h1" eager />
+    {(older || newer) && (
+      <nav class="log-pager" aria-label="More posts">
+        {older && (
+          <a href={`/photo-log/${older.slug}`} rel="prev">
+            ← Previous post
+          </a>
+        )}
+        {newer && (
+          <a href={`/photo-log/${newer.slug}`} rel="next">
+            Next post →
+          </a>
+        )}
+      </nav>
+    )}
+  </div>
+</Base>

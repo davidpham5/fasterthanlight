@@ -126,3 +126,23 @@ h3 {
   margin: 2rem 0 0.5rem;
   font-size: 1.25rem;
 }
+
+/* Photo Log feed and post pages: one centred column of posts, then Newer/Older links. */
+.log {
+  display: grid;
+  gap: clamp(4rem, 10vw, 7rem);
+  max-width: 68.75rem;
+}
+
+.log-pager {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  max-width: 38rem;
+  margin: 0 auto;
+}
+
+.log-pager a[rel='next'] {
+  margin-left: auto;
+}
