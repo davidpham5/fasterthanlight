@@ -25,6 +25,8 @@
     border: 0;
     background: var(--paper);
     color: var(--ink);
+    /* Vertical scrolling stays with the browser; horizontal drags are ours, so they end in pointerup. */
+    touch-action: pan-y;
   }
   .viewer[open] {
     display: grid;

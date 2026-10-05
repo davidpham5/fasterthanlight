@@ -130,6 +130,8 @@ test.describe('with published posts', () => {
       await first.click();
       const dialog = page.getByRole('dialog', { name: 'Photo viewer' });
       await expect(dialog).toBeVisible();
+      // Lets the browser keep vertical scrolling but leaves horizontal drags to the swipe handler.
+      await expect(dialog).toHaveCSS('touch-action', 'pan-y');
       await expect(big(page)).toHaveAttribute('alt', post.photos[0].alt);
       await expect(big(page)).toHaveAttribute(
         'src',

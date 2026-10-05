@@ -69,6 +69,7 @@ export function enhanceViewer(dialog: HTMLDialogElement): void {
   dialog.addEventListener('pointerdown', (event) => {
     start = event.pointerType === 'mouse' ? null : { x: event.clientX, y: event.clientY };
   });
+  dialog.addEventListener('pointercancel', () => (start = null));
   dialog.addEventListener('pointerup', (event) => {
     if (!start || group.length < 2) return;
     const direction = swipeDirection(event.clientX - start.x, event.clientY - start.y);
