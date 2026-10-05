@@ -1,0 +1,94 @@
+<dialog class="viewer" aria-label="Photo viewer">
+  <button class="viewer__close" type="button" aria-label="Close">
+    ✕
+  </button>
+  <button class="viewer__nav" type="button" data-dir="-1" aria-label="Previous photo">
+    ‹
+  </button>
+  <figure class="viewer__figure">
+    <img class="viewer__img" alt="" />
+    <figcaption class="viewer__caption" aria-live="polite"></figcaption>
+  </figure>
+  <button class="viewer__nav" type="button" data-dir="1" aria-label="Next photo">
+    ›
+  </button>
+</dialog>
+
+<style>
+  .viewer {
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    padding: 3.5rem 0 1rem;
+    border: 0;
+    background: var(--paper);
+    color: var(--ink);
+  }
+  .viewer[open] {
+    display: grid;
+    grid-template-columns: 3rem minmax(0, 1fr) 3rem;
+    align-items: center;
+  }
+  .viewer::backdrop {
+    background: var(--paper);
+  }
+  .viewer__figure {
+    grid-column: 2;
+    display: grid;
+    justify-items: center;
+    gap: 0.75rem;
+    margin: 0;
+  }
+  /* Sized from the known aspect ratio before the large file loads; never above its real width. */
+  .viewer__img {
+    width: min(100%, calc((100svh - 9rem) * var(--ar, 1)), var(--w, 100%));
+    height: auto;
+    aspect-ratio: var(--ar, auto);
+    background-size: cover;
+  }
+  .viewer__caption {
+    min-height: 1.5em;
+    text-align: center;
+    font-size: 0.875rem;
+    color: var(--muted);
+    white-space: pre-line;
+  }
+  .viewer__close,
+  .viewer__nav {
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .viewer__close:hover,
+  .viewer__nav:hover {
+    color: var(--ink);
+  }
+  .viewer__close {
+    position: absolute;
+    top: 0.75rem;
+    right: 1rem;
+    width: 2.75rem;
+    height: 2.75rem;
+    font-size: 1.25rem;
+  }
+  .viewer__nav {
+    height: 3rem;
+    font-size: 1.75rem;
+    line-height: 1;
+  }
+  .viewer__nav[data-dir='1'] {
+    grid-column: 3;
+  }
+</style>
+
+<script>
+  import { enhanceViewer } from '../scripts/viewer';
+
+  const dialog = document.querySelector<HTMLDialogElement>('dialog.viewer');
+  if (dialog) enhanceViewer(dialog);
+</script>

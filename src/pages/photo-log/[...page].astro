@@ -1,6 +1,7 @@
 ---
 import type { GetStaticPaths, Page } from 'astro';
 import LogPost from '../../components/LogPost.astro';
+import Viewer from '../../components/Viewer.astro';
 import Base from '../../layouts/Base.astro';
 import { LOG_DESCRIPTION, publishedPosts, type Post } from '../../lib/log-posts';
 import { POSTS_PER_PAGE } from '../../lib/photo-log';
@@ -51,4 +52,5 @@ const first = page.currentPage === 1;
       </nav>
     )}
   </div>
+  <Viewer />
 </Base>

@@ -118,6 +118,78 @@ test.describe('with published posts', () => {
     );
   });
 
+  test.describe('viewer', () => {
+    const post = logPosts.find((p) => p.photos.length > 1) ?? latest;
+    const big = (page: import('@playwright/test').Page) => page.locator('.viewer__img');
+
+    test('opens on click, moves with arrows, closes with Esc and returns focus', async ({
+      page,
+    }) => {
+      await page.goto(`/photo-log/${post.slug}`);
+      const first = page.locator('a[data-viewer-item]').first();
+      await first.click();
+      const dialog = page.getByRole('dialog', { name: 'Photo viewer' });
+      await expect(dialog).toBeVisible();
+      await expect(big(page)).toHaveAttribute('alt', post.photos[0].alt);
+      await expect(big(page)).toHaveAttribute(
+        'src',
+        new RegExp(
+          `/img/f_auto,q_auto,c_limit,w_1600/${post.photos[0].publicId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`,
+        ),
+      );
+      if (post.photos.length > 1) {
+        await page.keyboard.press('ArrowRight');
+        await expect(big(page)).toHaveAttribute('alt', post.photos[1].alt);
+        await dialog.getByRole('button', { name: 'Previous photo' }).click();
+        await expect(big(page)).toHaveAttribute('alt', post.photos[0].alt);
+      }
+      await page.keyboard.press('Escape');
+      await expect(dialog).toBeHidden();
+      await expect(first).toBeFocused();
+    });
+
+    test('closes with the ✕ button and a click on the empty space', async ({ page }) => {
+      await page.goto(`/photo-log/${post.slug}`);
+      const dialog = page.getByRole('dialog', { name: 'Photo viewer' });
+      await page.locator('a[data-viewer-item]').first().click();
+      await dialog.getByRole('button', { name: 'Close' }).click();
+      await expect(dialog).toBeHidden();
+      await page.locator('a[data-viewer-item]').first().click();
+      await page.mouse.click(5, 5);
+      await expect(dialog).toBeHidden();
+    });
+
+    test('modified clicks are left to the browser', async ({ page }) => {
+      await page.goto(`/photo-log/${post.slug}`);
+      const link = page.locator('a[data-viewer-item]').first();
+      const opened = await link.evaluate((a) => {
+        const event = new MouseEvent('click', { bubbles: true, cancelable: true, metaKey: true });
+        a.addEventListener('click', (e) => e.preventDefault(), { once: true }); // don't open a tab
+        a.dispatchEvent(event);
+        return document.querySelector('dialog.viewer')!.hasAttribute('open');
+      });
+      expect(opened).toBe(false);
+    });
+
+    test('swipes between photos on touch', async ({ page }, testInfo) => {
+      test.skip(testInfo.project.name !== 'mobile' || post.photos.length < 2);
+      await page.goto(`/photo-log/${post.slug}`);
+      await page.locator('a[data-viewer-item]').first().click();
+      await page.locator('dialog.viewer').evaluate((el) => {
+        const init = (x: number): PointerEventInit => ({
+          bubbles: true,
+          pointerType: 'touch',
+          isPrimary: true,
+          clientX: x,
+          clientY: 300,
+        });
+        el.dispatchEvent(new PointerEvent('pointerdown', init(300)));
+        el.dispatchEvent(new PointerEvent('pointerup', init(150)));
+      });
+      await expect(big(page)).toHaveAttribute('alt', post.photos[1].alt);
+    });
+  });
+
   test.describe('without JavaScript', () => {
     test.use({ javaScriptEnabled: false });
     test('each photo links to its 1600px image', async ({ page }) => {
