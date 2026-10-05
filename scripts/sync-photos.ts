@@ -10,6 +10,7 @@ import { v2 as cloudinary } from 'cloudinary';
 import { parseLogFile, type PhotoLogFile, type PhotosFile } from '../src/lib/schema';
 import { describeError, isNotFound } from './sync/errors';
 import { pickExif } from './sync/exif';
+import { listAllFolders, type Folder, type FolderPage } from './sync/folders';
 import {
   knownIds,
   mergePhotos,
@@ -101,6 +102,16 @@ async function listFolder(mode: FolderMode, folder: string): Promise<RemotePhoto
   return photos.sort((a, b) => a.id.localeCompare(b.id));
 }
 
+function listSubFolders(path: string): Promise<Folder[]> {
+  return listAllFolders(
+    async (cursor) =>
+      (await cloudinary.api.sub_folders(path, {
+        max_results: 500,
+        next_cursor: cursor,
+      })) as FolderPage,
+  );
+}
+
 const GUARDED = ['src/content/photos.json', 'src/content/photo-log.json', 'src/content/photo-log'];
 
 /** Includes untracked files, so a brand-new draft David is editing is protected too. */
@@ -166,11 +177,9 @@ async function readPostTexts(): Promise<Map<string, string>> {
 const today = () => new Date().toLocaleDateString('en-CA');
 
 async function syncLog(mode: FolderMode, workDir: string): Promise<void> {
-  let folders: { name: string; path: string }[] = [];
+  let folders: Folder[] = [];
   try {
-    ({ folders } = (await cloudinary.api.sub_folders(LOG_ROOT)) as {
-      folders: { name: string; path: string }[];
-    });
+    folders = await listSubFolders(LOG_ROOT);
   } catch (error) {
     if (!isNotFound(error)) throw error; // no photo-log/ folder yet: no posts
   }
@@ -268,9 +277,7 @@ async function main(): Promise<void> {
 async function syncPortfolio(workDir: string, force: boolean): Promise<void> {
   const mode = await folderMode();
 
-  const { folders } = (await cloudinary.api.sub_folders(ROOT)) as {
-    folders: { name: string; path: string }[];
-  };
+  const folders = await listSubFolders(ROOT);
   let remoteSets: RemoteSet[] = [];
   let remoteExtras: RemotePhoto[] = [];
   for (const folder of folders) {
