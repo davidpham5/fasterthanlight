@@ -2,7 +2,7 @@
 // new photos' originals first.
 // Usage: npm run sync-photos [-- --force | -- --audit-location]   (needs CLOUDINARY_URL in .env)
 import { execFileSync } from 'node:child_process';
-import { mkdir, mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -19,6 +19,7 @@ import {
   type RemoteSet,
 } from './sync/merge';
 import { LOG_ROOT, parseFolderName, syncPhotoLog, type RemoteLogFolder } from './sync/photo-log';
+import { readPostTexts } from './sync/post-files';
 import { cloudinaryDeps, protectAll, protectPhoto, type ProtectReport } from './sync/protect';
 import { endExiftool } from './sync/strip';
 
@@ -159,20 +160,6 @@ async function readLogFile(): Promise<PhotoLogFile> {
   }
 }
 
-async function readPostTexts(): Promise<Map<string, string>> {
-  const texts = new Map<string, string>();
-  let names: string[] = [];
-  try {
-    names = await readdir(LOG_DIR);
-  } catch {
-    return texts;
-  }
-  for (const name of names.filter((n) => n.endsWith('.md'))) {
-    texts.set(name.slice(0, -3), await readFile(new URL(name, LOG_DIR), 'utf8'));
-  }
-  return texts;
-}
-
 /** Local calendar day, YYYY-MM-DD. */
 const today = () => new Date().toLocaleDateString('en-CA');
 
@@ -222,7 +209,12 @@ async function syncLog(mode: FolderMode, workDir: string): Promise<void> {
     });
   }
 
-  const { file, writes, report } = syncPhotoLog(existing, remote, await readPostTexts(), today());
+  const { file, writes, report } = syncPhotoLog(
+    existing,
+    remote,
+    await readPostTexts(LOG_DIR),
+    today(),
+  );
   await mkdir(LOG_DIR, { recursive: true });
   await writeFile(LOG_FILE, `${JSON.stringify(file, null, 2)}\n`);
   for (const [slug, text] of writes) await writeFile(new URL(`${slug}.md`, LOG_DIR), text);
