@@ -1,5 +1,6 @@
 // Pulls photo metadata from Cloudinary into src/content/photos.json, removing location data from
-// new photos' originals first.
+// new photos' originals first. Also syncs the Photo Log: photo-log.json (generated) and a draft
+// photo-log/<slug>.md per Cloudinary folder photo-log/<slug>/ (those post files are David's).
 // Usage: npm run sync-photos [-- --force | -- --audit-location]   (needs CLOUDINARY_URL in .env)
 import { execFileSync } from 'node:child_process';
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
