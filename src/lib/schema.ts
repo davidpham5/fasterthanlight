@@ -48,10 +48,78 @@ export const siteSchema = z.object({
   portraitId: z.string().min(1),
 });
 
+/** A camera-line override: a number gets its unit, a string is shown as written, '' hides it. */
+const override = z.union([z.string(), z.number().positive()]).optional();
+
+export const logPhotoSchema = z.object({
+  id: z.coerce.string().min(1),
+  alt: z.string().default(''),
+  caption: z.string().trim().optional(),
+  camera: override,
+  lens: override,
+  focal: override,
+  aperture: override,
+  shutter: override,
+  iso: override,
+});
+
+/** One Photo Log post file. Drafts may be incomplete; published posts must be complete. */
+export const logPostSchema = z
+  .object({
+    title: z.string().trim().min(1),
+    date: z.coerce.date(),
+    draft: z.boolean().default(false),
+    photos: z.array(logPhotoSchema).default([]),
+  })
+  .superRefine((post, ctx) => {
+    if (post.draft) return;
+    if (post.photos.length === 0) {
+      ctx.addIssue({ code: 'custom', path: ['photos'], message: 'a published post needs photos' });
+    }
+    post.photos.forEach((photo, i) => {
+      if (photo.alt.trim()) return;
+      ctx.addIssue({
+        code: 'custom',
+        path: ['photos', i, 'alt'],
+        message: `alt text is required for "${photo.id}" (or keep the post as a draft)`,
+      });
+    });
+  });
+
+export const rawExifSchema = z.object({
+  make: z.string().optional(),
+  model: z.string().optional(),
+  lens: z.string().optional(),
+  focal: z.string().optional(),
+  aperture: z.string().optional(),
+  shutter: z.string().optional(),
+  iso: z.string().optional(),
+  takenAt: z.string().optional(),
+});
+
+export const logImageSchema = z.object({
+  publicId: z.string().min(1),
+  width: z.number().int().positive(),
+  height: z.number().int().positive(),
+  placeholder: z.string().startsWith('data:image/').optional(),
+  uploadedAt: z.string(),
+  exif: rawExifSchema,
+});
+
+/** src/content/photo-log.json, written by the sync: post slug → photo name → image data. */
+export const photoLogFileSchema = z.object({
+  posts: z.record(z.string(), z.object({ photos: z.record(z.string(), logImageSchema) })),
+});
+
 export type Photo = z.infer<typeof photoSchema>;
 export type PhotoSet = z.infer<typeof setSchema>;
 export type PhotosFile = z.infer<typeof photosFileSchema>;
 export type Site = z.infer<typeof siteSchema>;
+export type LogPhoto = z.infer<typeof logPhotoSchema>;
+export type LogPost = z.infer<typeof logPostSchema>;
+export type RawExif = z.infer<typeof rawExifSchema>;
+export type LogImage = z.infer<typeof logImageSchema>;
+export type PhotoLogFile = z.infer<typeof photoLogFileSchema>;
 
 export interface Content {
   site: Site;
@@ -88,4 +156,12 @@ export function loadContent(siteRaw: unknown, photosRaw: unknown): Content {
   };
 
   return { site, sets, hero: extra('heroId'), portrait: extra('portraitId') };
+}
+
+export function parseLogFile(raw: unknown): PhotoLogFile {
+  const result = photoLogFileSchema.safeParse(raw);
+  if (!result.success) {
+    throw new ContentError(`photo-log.json is invalid:\n${z.prettifyError(result.error)}`);
+  }
+  return result.data;
 }

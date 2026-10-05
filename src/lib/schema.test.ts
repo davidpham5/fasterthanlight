@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { loadContent } from './schema';
+import { loadContent, logPostSchema, parseLogFile } from './schema';
 
 const site = {
   name: 'FasterThanLight Studio',
@@ -74,6 +74,83 @@ describe('loadContent', () => {
   it('rejects an invalid email in site.json', () => {
     expect(() => loadContent({ ...site, email: 'not-an-email' }, photos)).toThrow(
       /site\.json is invalid/,
+    );
+  });
+});
+
+describe('logPostSchema', () => {
+  const post = {
+    title: 'Peonies',
+    date: '2026-09-28',
+    photos: [{ id: 'DSCF1', alt: 'A peony' }],
+  };
+
+  it('accepts a published post and parses its date', () => {
+    const parsed = logPostSchema.parse(post);
+    expect(parsed.draft).toBe(false);
+    expect(parsed.date.toISOString()).toBe('2026-09-28T00:00:00.000Z');
+  });
+
+  it('lets a draft have empty alt text and no photos', () => {
+    expect(
+      logPostSchema.safeParse({ ...post, draft: true, photos: [{ id: 'a', alt: '' }] }).success,
+    ).toBe(true);
+    expect(logPostSchema.safeParse({ ...post, draft: true, photos: [] }).success).toBe(true);
+  });
+
+  it('fails a published post with missing alt text, naming the photo', () => {
+    const result = logPostSchema.safeParse({ ...post, photos: [{ id: 'DSCF2', alt: '  ' }] });
+    expect(result.success).toBe(false);
+    expect(JSON.stringify(result.error?.issues)).toContain('alt text is required for \\"DSCF2\\"');
+  });
+
+  it('fails a published post with no photos', () => {
+    expect(logPostSchema.safeParse({ ...post, photos: [] }).success).toBe(false);
+  });
+
+  it('accepts camera overrides as numbers or strings, including empty strings', () => {
+    const photo = {
+      id: 'a',
+      alt: 'x',
+      lens: 'Helios 44-2',
+      focal: 58,
+      aperture: 2,
+      iso: '',
+      shutter: '1/250',
+    };
+    expect(logPostSchema.parse({ ...post, photos: [photo] }).photos[0]).toMatchObject(photo);
+  });
+
+  it('rejects zero or negative numeric overrides', () => {
+    expect(
+      logPostSchema.safeParse({ ...post, photos: [{ id: 'a', alt: 'x', focal: 0 }] }).success,
+    ).toBe(false);
+  });
+});
+
+describe('parseLogFile', () => {
+  it('accepts generated data', () => {
+    const file = {
+      posts: {
+        peonies: {
+          photos: {
+            DSCF1: {
+              publicId: 'photo-log/peonies/DSCF1',
+              width: 1086,
+              height: 1448,
+              uploadedAt: '2026-09-28T17:02:11Z',
+              exif: { make: 'FUJIFILM', model: 'X-T3' },
+            },
+          },
+        },
+      },
+    };
+    expect(parseLogFile(file)).toEqual(file);
+  });
+
+  it('throws a readable error for invalid data', () => {
+    expect(() => parseLogFile({ posts: { x: { photos: { a: { width: -1 } } } } })).toThrow(
+      /photo-log.json is invalid/,
     );
   });
 });
