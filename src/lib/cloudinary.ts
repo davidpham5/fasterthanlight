@@ -5,7 +5,7 @@ export type Width = 400 | 800 | 1600 | 2560;
 export const WIDTHS: readonly Width[] = [400, 800, 1600, 2560];
 
 /** Delivered images never exceed this on their long edge (spec §5). */
-const MAX_EDGE = 2560;
+const MAX_EDGE: Width = 2560;
 /** Same-origin path that proxies to {@link originFor}. */
 export const IMAGE_PATH = '/img';
 
@@ -53,9 +53,11 @@ function deliveredWidth(width: Width, originalWidth: number, originalHeight: num
 export function srcsetEntries(
   originalWidth: number,
   originalHeight: number = originalWidth,
+  maxWidth: Width = MAX_EDGE,
 ): { width: Width; descriptor: number }[] {
   const entries: { width: Width; descriptor: number }[] = [];
   for (const width of WIDTHS) {
+    if (width > maxWidth) break;
     const descriptor = deliveredWidth(width, originalWidth, originalHeight);
     const previous = entries[entries.length - 1];
     if (previous && descriptor <= previous.descriptor) break;
@@ -65,13 +67,16 @@ export function srcsetEntries(
   return entries;
 }
 
-export function srcsetFor(photo: { id: string; width: number; height?: number }): string {
-  return srcsetEntries(photo.width, photo.height)
+export function srcsetFor(
+  photo: { id: string; width: number; height?: number },
+  maxWidth: Width = MAX_EDGE,
+): string {
+  return srcsetEntries(photo.width, photo.height, maxWidth)
     .map(({ width, descriptor }) => `${urlFor(photo.id, width)} ${descriptor}w`)
     .join(', ');
 }
 
-export function defaultWidth(originalWidth: number): Width {
-  const entries = srcsetEntries(originalWidth);
+export function defaultWidth(originalWidth: number, maxWidth: Width = MAX_EDGE): Width {
+  const entries = srcsetEntries(originalWidth, originalWidth, maxWidth);
   return entries.find((e) => e.width === 1600)?.width ?? entries[entries.length - 1].width;
 }

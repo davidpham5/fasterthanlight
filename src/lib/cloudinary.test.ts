@@ -112,3 +112,18 @@ describe('imageProxyRules', () => {
     ]);
   });
 });
+
+describe('maxWidth', () => {
+  it('stops the srcset at the cap', () => {
+    expect(srcsetEntries(6000, 4000, 1600).map((e) => e.width)).toEqual([400, 800, 1600]);
+    expect(srcsetFor({ id: 'p', width: 6000, height: 4000 }, 1600)).not.toContain('w_2560');
+  });
+
+  it('caps the default src too', () => {
+    expect(defaultWidth(6000, 800)).toBe(800);
+  });
+
+  it('changes nothing when not given', () => {
+    expect(srcsetEntries(6000, 4000).map((e) => e.width)).toEqual([400, 800, 1600, 2560]);
+  });
+});
