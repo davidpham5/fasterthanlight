@@ -48,6 +48,8 @@ describe('cameraLine', () => {
     expect(cameraLine({ aperture: '2.0' })).toBe('f/2');
     expect(cameraLine({ aperture: '0.95' })).toBe('f/0.95');
     expect(cameraLine({ aperture: '1.25' })).toBe('f/1.25');
+    expect(cameraLine({ aperture: '10' })).toBe('f/10');
+    expect(cameraLine({ aperture: '22.0' })).toBe('f/22');
     expect(cameraLine({ shutter: '0.5' })).toBe('0.5s');
     expect(cameraLine({ shutter: '2' })).toBe('2s');
   });
@@ -80,5 +82,6 @@ describe('cameraLine', () => {
       }),
     ).toBe('Fujifilm X-T3 · Helios 44-2 · 58mm · f/2 · 1/250');
     expect(cameraLine({}, { camera: 'Pentax K1000', iso: 400 })).toBe('Pentax K1000 · ISO 400');
+    expect(cameraLine({}, { aperture: 10 })).toBe('f/10');
   });
 });

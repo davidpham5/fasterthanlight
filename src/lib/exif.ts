@@ -51,8 +51,8 @@ function positive(value?: string): number | undefined {
 }
 
 const oneDecimal = (n: number) => String(Math.round(n * 10) / 10);
-// Trim trailing zeros after rounding to 2 decimals.
-const twoDecimals = (n: number) => String(Math.round(n * 100) / 100).replace(/\.?0+$/, '');
+// Keep up to 2 decimals; String() naturally omits trailing zeros.
+const twoDecimals = (n: number) => String(Math.round(n * 100) / 100);
 const units = {
   focal: (n: number) => `${oneDecimal(n)}mm`,
   aperture: (n: number) => `f/${twoDecimals(n)}`,
