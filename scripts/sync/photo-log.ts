@@ -9,6 +9,7 @@ export const LOG_ROOT = 'photo-log';
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const DATED = /^(\d{4}-\d{2}-\d{2})(?:-(.+))?$/;
 const FRONTMATTER = /^---\r?\n([\s\S]*?)^---[ \t]*(?:\r?\n|$)/m;
+const POST_KEYS = new Set(['title', 'date', 'draft', 'photos']);
 const YAML_OPTIONS = { lineWidth: 0 } as const; // never fold long alt text
 
 export interface LogFolder {
@@ -101,6 +102,20 @@ export function updatePost(
   const doc = parseDocument(match[1]);
   if (doc.errors.length > 0) {
     throw new Error(`${slug}.md frontmatter is invalid YAML: ${doc.errors[0].message}`);
+  }
+  // The lazy FRONTMATTER match stops at the first --- rule, so a post missing its closing line can
+  // swallow body prose. Prose that parses as YAML would otherwise be rewritten into the frontmatter.
+  if (!isMap(doc.contents)) {
+    throw new Error(`${slug}.md frontmatter must be key: value lines (title, date, photos)`);
+  }
+  const unexpected = doc.contents.items
+    .map((pair) => String(pair.key))
+    .filter((k) => !POST_KEYS.has(k));
+  if (unexpected.length > 0) {
+    throw new Error(
+      `${slug}.md frontmatter has unexpected keys (${unexpected.join(', ')}). ` +
+        'Is the closing --- line missing?',
+    );
   }
   const current = doc.get('photos');
   const photos = isSeq(current) ? current : new YAMLSeq();

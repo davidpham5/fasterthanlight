@@ -181,6 +181,22 @@ A second section after a rule.
   });
 });
 
+describe('updatePost with a missing closing ---', () => {
+  it('refuses frontmatter that swallowed body text, naming the unexpected key', () => {
+    const text =
+      '---\ntitle: Peonies\ndate: 2026-09-28\nphotos:\n  - id: A\n    alt: a\n\n## Morning\n\nLight: soft and grey.\n\n---\n\nA second section.\n';
+    expect(() => updatePost(text, 'peonies', new Set(['A']), [photo('A'), photo('B')])).toThrow(
+      /peonies\.md frontmatter has unexpected keys \(Light\).*closing ---/,
+    );
+  });
+
+  it('refuses frontmatter that is not a map', () => {
+    expect(() => updatePost('---\n- a\n---\n', 'peonies', new Set(), [])).toThrow(
+      /peonies\.md frontmatter must be key: value lines/,
+    );
+  });
+});
+
 describe('syncPhotoLog', () => {
   const existing: PhotoLogFile = {
     posts: {
