@@ -26,6 +26,7 @@
     "@lhci/cli": "^0.15.1",
     "@playwright/test": "^1.63.0",
     "cloudinary": "^2.11.0",
+    "exiftool-vendored": "^38.3.0",
     "prettier": "^3.9.9",
     "prettier-plugin-astro": "^1.1.0",
     "tsx": "^4.23.15",

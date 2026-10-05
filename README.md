@@ -28,3 +28,10 @@ Requires Node 24 (`.nvmrc`).
 4. `npm run sync-photos`, review with `git diff src/content/photos.json`, then commit.
    The sync also refuses to write if it would empty the file or remove more than half the photos
    (usually a folder-name mistake); add `-- --force` only if that is really what you want.
+5. Location data is removed automatically. The sync downloads any new photo whose original contains
+   GPS coordinates or place names, deletes just those fields with exiftool (no re-compression), and
+   re-uploads it under the same name. A non-JPEG with location (e.g. an iPhone HEIC) is held back:
+   re-export it as a JPEG without location and sync again.
+6. `npm run sync-photos -- --audit-location` checks every photo already on the site the same way
+   (one or two Cloudinary Admin API calls per photo, two when it cleans one). It cleans what it
+   can and lists anything to replace; it never removes photos from the site.

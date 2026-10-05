@@ -31,6 +31,14 @@ export function titleFromSlug(slug: string): string {
     .join(' ');
 }
 
+/** Public IDs already on the site; anything else the sync finds is new. */
+export function knownIds(file: PhotosFile): Set<string> {
+  return new Set([
+    ...file.sets.flatMap((set) => set.photos.map((photo) => photo.id)),
+    ...Object.keys(file.extras),
+  ]);
+}
+
 /** Hand-edited alt/caption win over Cloudinary metadata; dimensions/placeholder come from Cloudinary. */
 function mergePhoto(remote: RemotePhoto, local?: { alt?: string; caption?: string }): Photo {
   const photo: Photo = {

@@ -5,10 +5,15 @@
  */
 export function describeError(error: unknown): string {
   if (error instanceof Error) return error.message;
-  const api = (error as { error?: { message?: unknown; http_code?: unknown } } | null)?.error;
-  if (api && typeof api.message === 'string') {
-    const code = api.http_code === undefined ? '' : ` ${String(api.http_code)}`;
-    return `Cloudinary API error${code}: ${api.message}`;
+  type Body = { message?: unknown; http_code?: unknown };
+  const hasMessage = (value: unknown): value is Body & { message: string } =>
+    typeof value === 'object' && value !== null && typeof (value as Body).message === 'string';
+  // The Admin API wraps the body in `error`; the uploader rejects with the bare body.
+  const wrapped = (error as { error?: unknown } | null)?.error;
+  const body = hasMessage(wrapped) ? wrapped : hasMessage(error) ? error : undefined;
+  if (body) {
+    const code = body.http_code === undefined ? '' : ` ${String(body.http_code)}`;
+    return `Cloudinary API error${code}: ${body.message}`;
   }
   return 'Unknown error (details hidden)';
 }

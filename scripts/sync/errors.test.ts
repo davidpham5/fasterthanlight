@@ -12,6 +12,18 @@ describe('describeError', () => {
     expect(text).not.toContain('SECRET');
   });
 
+  it('handles the uploader shape, a bare { message, http_code } body', () => {
+    const uploaderError = {
+      message: 'Invalid Signature',
+      http_code: 401,
+      request_options: { auth: { api_key: 'KEY123', api_secret: 'SECRET456' } },
+    };
+    const text = describeError(uploaderError);
+    expect(text).toBe('Cloudinary API error 401: Invalid Signature');
+    expect(text).not.toContain('KEY123');
+    expect(text).not.toContain('SECRET456');
+  });
+
   it('returns the message of a normal Error', () => {
     expect(describeError(new Error('boom'))).toBe('boom');
   });

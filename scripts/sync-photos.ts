@@ -1,12 +1,23 @@
-// Pulls photo metadata from Cloudinary into src/content/photos.json.
-// Usage: npm run sync-photos   (needs CLOUDINARY_URL in .env — see .env.example)
+// Pulls photo metadata from Cloudinary into src/content/photos.json, removing location data from
+// new photos' originals first.
+// Usage: npm run sync-photos [-- --force | -- --audit-location]   (needs CLOUDINARY_URL in .env)
 import { execFileSync } from 'node:child_process';
-import { readFile, writeFile } from 'node:fs/promises';
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { v2 as cloudinary } from 'cloudinary';
 import type { PhotosFile } from '../src/lib/schema';
 import { describeError } from './sync/errors';
-import { mergePhotos, syncProblems, type RemotePhoto, type RemoteSet } from './sync/merge';
+import {
+  knownIds,
+  mergePhotos,
+  syncProblems,
+  type RemotePhoto,
+  type RemoteSet,
+} from './sync/merge';
+import { cloudinaryDeps, protectAll, protectPhoto, type ProtectReport } from './sync/protect';
+import { endExiftool } from './sync/strip';
 
 const ROOT = 'portfolio';
 const EXTRAS = '_extras';
@@ -93,27 +104,62 @@ function hasUncommittedEdits(): boolean {
   }
 }
 
+function printProtection(report: ProtectReport, heldMeans: string): void {
+  for (const id of report.cleaned) console.log(`Removed location from ${id}`);
+  if (report.held.length) {
+    console.warn(`\n⚠ ${report.held.length} photo(s) ${heldMeans}:`);
+    for (const { id, reason } of report.held) console.warn(`  ${id} ${reason}`);
+  }
+}
+
+/** --audit-location: checks every photo already on the site, cleaning any with location. */
+async function auditLocation(workDir: string): Promise<void> {
+  const existing = JSON.parse(await readFile(FILE, 'utf8')) as PhotosFile;
+  const ids = [...knownIds(existing)].map((id) => ({ id }));
+  console.log(`Checking ${ids.length} photos for location data…`);
+  const deps = cloudinaryDeps();
+  const { report } = await protectAll(ids, (id) => protectPhoto(id, deps, workDir));
+  printProtection(report, 'could not be cleaned. They stay on the site; replace them');
+  const clean = ids.length - report.cleaned.length - report.held.length;
+  console.log(
+    `\nChecked ${ids.length}: ${clean} had no location, ${report.cleaned.length} cleaned, ` +
+      `${report.held.length} need replacing.`,
+  );
+}
+
 async function main(): Promise<void> {
   if (!process.env.CLOUDINARY_URL) {
     console.error('CLOUDINARY_URL is not set. Copy .env.example to .env and fill it in.');
     process.exit(1);
   }
+  cloudinary.config({ secure: true });
+  const workDir = await mkdtemp(join(tmpdir(), 'ftl-sync-'));
+  try {
+    if (process.argv.includes('--audit-location')) await auditLocation(workDir);
+    else await syncPortfolio(workDir);
+  } finally {
+    await endExiftool();
+    await rm(workDir, { recursive: true, force: true });
+  }
+}
+
+async function syncPortfolio(workDir: string): Promise<void> {
   const force = process.argv.includes('--force');
   if (!force && hasUncommittedEdits()) {
     console.error(
       'src/content/photos.json has uncommitted changes. Commit them first so a sync can never ' +
         'lose your edits (or rerun with --force).',
     );
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
-  cloudinary.config({ secure: true });
   const mode = await folderMode();
 
   const { folders } = (await cloudinary.api.sub_folders(ROOT)) as {
     folders: { name: string; path: string }[];
   };
-  const remoteSets: RemoteSet[] = [];
+  let remoteSets: RemoteSet[] = [];
   let remoteExtras: RemotePhoto[] = [];
   for (const folder of folders) {
     if (folder.name === EXTRAS) {
@@ -126,6 +172,24 @@ async function main(): Promise<void> {
   }
 
   const existing = JSON.parse(await readFile(FILE, 'utf8')) as PhotosFile;
+
+  // New photos have any location data removed from their original before they go on the site.
+  const known = knownIds(existing);
+  const candidates = [...remoteSets.flatMap((set) => set.photos), ...remoteExtras].filter(
+    (photo) => !known.has(photo.id),
+  );
+  const deps = cloudinaryDeps();
+  const { report: protection } = await protectAll(candidates, (id) =>
+    protectPhoto(id, deps, workDir),
+  );
+  const held = new Set(protection.held.map((h) => h.id));
+  const notHeld = (photo: RemotePhoto) => !held.has(photo.id);
+  remoteSets = remoteSets.map((set) => ({ ...set, photos: set.photos.filter(notHeld) }));
+  remoteExtras = remoteExtras.filter(notHeld);
+
+  // Printed before the refusal check below: Cloudinary has already been changed by this point.
+  printProtection(protection, 'were held back and not added to the site');
+
   const { data, report } = mergePhotos(existing, remoteSets, remoteExtras);
   const problems = syncProblems(existing, data, report);
   if (problems.length > 0 && !force) {
@@ -133,7 +197,8 @@ async function main(): Promise<void> {
     console.error(
       'Check the folder names in Cloudinary, or rerun with --force if this is intended.',
     );
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
   await writeFile(FILE, `${JSON.stringify(data, null, 2)}\n`);
 
