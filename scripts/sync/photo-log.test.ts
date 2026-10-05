@@ -249,6 +249,57 @@ describe('syncPhotoLog', () => {
     });
   });
 
+  it('orders photos uploaded in the same second by capture time, then name', () => {
+    const sameSecond = '2026-10-01T09:00:00Z';
+    const { file, writes } = syncPhotoLog(
+      { posts: {} },
+      [
+        {
+          slug: 'walk',
+          title: 'Walk',
+          photos: [
+            // Names sort A, B, C, D; capture times run the other way, and D has none (sorts first).
+            photo('A1', { uploadedAt: sameSecond, exif: { takenAt: '2026:10:01 09:30:00' } }),
+            photo('B2', { uploadedAt: sameSecond, exif: { takenAt: '2026:10:01 09:20:00' } }),
+            photo('C3', { uploadedAt: sameSecond, exif: { takenAt: '2026:10:01 09:10:00' } }),
+            photo('D4', { uploadedAt: sameSecond }),
+          ],
+        },
+      ],
+      new Map(),
+      '2026-10-03',
+    );
+    expect(Object.keys(file.posts.walk.photos)).toEqual(['D4', 'C3', 'B2', 'A1']);
+    expect(writes.get('walk')).toMatch(/- id: D4[\s\S]*- id: C3[\s\S]*- id: B2[\s\S]*- id: A1/);
+  });
+
+  it('uses stored capture time for known photos, which come without EXIF', () => {
+    const sameSecond = '2026-09-28T17:00:00Z';
+    const stored = (takenAt: string) => ({
+      publicId: 'x',
+      width: 1,
+      height: 1,
+      uploadedAt: sameSecond,
+      exif: { takenAt },
+    });
+    const { file } = syncPhotoLog(
+      { posts: { peonies: { photos: { A1: stored('2026:09:28 10:00:00') } } } },
+      [
+        {
+          slug: 'peonies',
+          title: 'Peonies',
+          photos: [
+            photo('A1', { uploadedAt: sameSecond }),
+            photo('B2', { uploadedAt: sameSecond, exif: { takenAt: '2026:09:28 09:00:00' } }),
+          ],
+        },
+      ],
+      new Map(),
+      '2026-10-03',
+    );
+    expect(Object.keys(file.posts.peonies.photos)).toEqual(['B2', 'A1']);
+  });
+
   it('updates existing posts, keeping stored EXIF for photos it already knows', () => {
     const { file, writes, report } = syncPhotoLog(
       existing,

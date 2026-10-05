@@ -164,8 +164,14 @@ export function syncPhotoLog(
 
   for (const folder of folders) {
     const before = existing.posts[folder.slug]?.photos ?? {};
+    // created_at is only precise to the second, so a bulk upload ties; capture time breaks the tie.
+    // Known photos arrive without EXIF, so fall back to the stored one.
+    const takenAt = (p: RemoteLogPhoto) => (p.exif ?? before[p.name]?.exif)?.takenAt ?? '';
     const ordered = [...folder.photos].sort(
-      (a, b) => a.uploadedAt.localeCompare(b.uploadedAt) || a.name.localeCompare(b.name),
+      (a, b) =>
+        a.uploadedAt.localeCompare(b.uploadedAt) ||
+        takenAt(a).localeCompare(takenAt(b)) ||
+        a.name.localeCompare(b.name),
     );
     const text = postTexts.get(folder.slug);
     if (ordered.length === 0 && text === undefined) continue;
