@@ -1,10 +1,14 @@
 ---
 import { sets, site } from '../lib/content';
+import { publishedPosts } from '../lib/log-posts';
 import { pagePath } from '../lib/url';
 
 const path = pagePath(Astro.url.pathname);
+// The link only appears once something is published, so it never leads to an empty page.
+const hasLog = (await publishedPosts()).length > 0;
 const links = [
   { href: `/gallery/${sets[0].slug}`, label: 'Gallery', section: '/gallery' },
+  ...(hasLog ? [{ href: '/photo-log', label: 'Photo Log', section: '/photo-log' }] : []),
   { href: '/about', label: 'About', section: '/about' },
   { href: '/contact', label: 'Contact', section: '/contact' },
 ];
