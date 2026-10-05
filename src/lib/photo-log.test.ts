@@ -136,6 +136,11 @@ describe('excerpt', () => {
   it('falls back when there is no text', () => {
     expect(excerpt('', 'Peonies')).toBe('Peonies');
   });
+  it('decodes numeric entities from Astro-style output', () => {
+    expect(excerpt('<p>Fuji &#x26; Helios &#x3C;3, it&#39;s &#38; more</p>', 'T')).toBe(
+      "Fuji & Helios <3, it's & more",
+    );
+  });
 });
 
 describe('rssContent', () => {

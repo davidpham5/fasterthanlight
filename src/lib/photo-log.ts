@@ -83,13 +83,11 @@ export function isoDate(date: Date): string {
 }
 
 const ENTITIES: Record<string, string> = {
-  '&amp;': '&',
-  '&lt;': '<',
-  '&gt;': '>',
-  '&quot;': '"',
-  '&#39;': "'",
-  '&#x27;': "'",
-  '&nbsp;': ' ',
+  amp: '&',
+  lt: '<',
+  gt: '>',
+  quot: '"',
+  nbsp: ' ',
 };
 
 /** The first paragraph of rendered Markdown as plain text, for descriptions and previews. */
@@ -97,7 +95,14 @@ export function excerpt(html: string, fallback: string): string {
   const first = /<p>([\s\S]*?)<\/p>/.exec(html)?.[1] ?? '';
   const text = first
     .replace(/<[^>]+>/g, '')
-    .replace(/&(?:amp|lt|gt|quot|#39|#x27|nbsp);/g, (entity) => ENTITIES[entity])
+    .replace(/&(?:([a-z]+)|#(x?[0-9a-f]+));/gi, (_, named, numeric) => {
+      if (named) return ENTITIES[named.toLowerCase()] ?? _;
+      // Numeric entity: decode as hex (x) or decimal.
+      const code = numeric.toLowerCase().startsWith('x')
+        ? parseInt(numeric.slice(1), 16)
+        : parseInt(numeric, 10);
+      return String.fromCodePoint(code);
+    })
     .replace(/\s+/g, ' ')
     .trim();
   return text || fallback;
