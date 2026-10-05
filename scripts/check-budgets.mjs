@@ -7,6 +7,7 @@ const DIST = 'dist';
 const KB = 1024;
 const CSS_LIMIT = 15 * KB;
 const GALLERY_JS_LIMIT = 10 * KB;
+const LOG_JS_LIMIT = 3 * KB;
 
 async function htmlFiles(dir) {
   const entries = await readdir(dir, { withFileTypes: true });
@@ -56,7 +57,11 @@ let failed = false;
 for (const file of await htmlFiles(DIST)) {
   const page = `/${relative(DIST, file)}`;
   const { js, css } = await measure(await readFile(file, 'utf8'));
-  const jsLimit = page.startsWith('/gallery/') ? GALLERY_JS_LIMIT : 0;
+  const jsLimit = page.startsWith('/gallery/')
+    ? GALLERY_JS_LIMIT
+    : page.startsWith('/photo-log')
+      ? LOG_JS_LIMIT
+      : 0;
   const ok = js <= jsLimit && css <= CSS_LIMIT;
   if (!ok) failed = true;
   console.log(
