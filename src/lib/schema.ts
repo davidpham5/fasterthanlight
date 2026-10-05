@@ -48,13 +48,19 @@ export const siteSchema = z.object({
   portraitId: z.string().min(1),
 });
 
+/** A blank `key:` in frontmatter is read as null; treat it the same as a missing key. */
+const blankIsMissing = (value: unknown) => (value === null ? undefined : value);
+
 /** A camera-line override: a number gets its unit, a string is shown as written, '' hides it. */
-const override = z.union([z.string(), z.number().positive()]).optional();
+const override = z.preprocess(
+  blankIsMissing,
+  z.union([z.string(), z.number().positive()]).optional(),
+);
 
 export const logPhotoSchema = z.object({
   id: z.coerce.string().min(1),
-  alt: z.string().default(''),
-  caption: z.string().trim().optional(),
+  alt: z.preprocess(blankIsMissing, z.string().default('')),
+  caption: z.preprocess(blankIsMissing, z.string().trim().optional()),
   camera: override,
   lens: override,
   focal: override,

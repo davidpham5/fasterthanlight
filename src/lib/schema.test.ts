@@ -104,6 +104,26 @@ describe('logPostSchema', () => {
     expect(JSON.stringify(result.error?.issues)).toContain('alt text is required for \\"DSCF2\\"');
   });
 
+  it('lets a draft leave alt, caption and overrides blank (YAML reads them as null)', () => {
+    const photo = { id: 'a', alt: null, caption: null, lens: null, focal: null, iso: null };
+    const result = logPostSchema.safeParse({ ...post, draft: true, photos: [photo] });
+    expect(result.success).toBe(true);
+    expect(result.data?.photos[0]).toMatchObject({ alt: '' });
+    expect(result.data?.photos[0].caption).toBeUndefined();
+    expect(result.data?.photos[0].lens).toBeUndefined();
+  });
+
+  it('fails a published post whose alt is null, with the usual message', () => {
+    const result = logPostSchema.safeParse({ ...post, photos: [{ id: 'DSCF2', alt: null }] });
+    expect(result.success).toBe(false);
+    expect(JSON.stringify(result.error?.issues)).toContain('alt text is required for \\"DSCF2\\"');
+  });
+
+  it('accepts a published post with a blank caption', () => {
+    const photo = { id: 'a', alt: 'x', caption: null };
+    expect(logPostSchema.safeParse({ ...post, photos: [photo] }).success).toBe(true);
+  });
+
   it('fails a published post with no photos', () => {
     expect(logPostSchema.safeParse({ ...post, photos: [] }).success).toBe(false);
   });

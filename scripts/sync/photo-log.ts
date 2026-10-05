@@ -1,7 +1,7 @@
 // Photo Log sync: Cloudinary folders photo-log/<slug>/ → src/content/photo-log.json (generated)
 // and src/content/photo-log/<slug>.md (David's). Post files are edited through the yaml Document
 // API so his comments and order survive; a file is only rewritten when photos were added or removed.
-import { Document, YAMLSeq, isMap, isSeq, parseDocument } from 'yaml';
+import { Document, YAMLSeq, isMap, isScalar, isSeq, parseDocument } from 'yaml';
 import { formatDate } from '../../src/lib/photo-log';
 import type { LogImage, PhotoLogFile, RawExif } from '../../src/lib/schema';
 
@@ -76,6 +76,18 @@ function photoEntry(photo: RemoteLogPhoto): Record<string, string> {
   return entry;
 }
 
+/**
+ * Double-quotes the text fields. Left plain, text like 2026-09-28 or 1 is written unquoted, and
+ * Astro's YAML reader turns it into a Date or number that the schema rejects.
+ */
+function quoteText(entry: unknown): void {
+  if (!isMap(entry)) return;
+  for (const key of ['alt', 'caption']) {
+    const value = entry.get(key, true);
+    if (isScalar(value)) value.type = 'QUOTE_DOUBLE';
+  }
+}
+
 export function draftPost(folder: LogFolder, photos: RemoteLogPhoto[], today: string): string {
   const doc = new Document({
     title: folder.title,
@@ -83,6 +95,8 @@ export function draftPost(folder: LogFolder, photos: RemoteLogPhoto[], today: st
     draft: true,
     photos: photos.map(photoEntry),
   });
+  const entries = doc.get('photos');
+  if (isSeq(entries)) entries.items.forEach(quoteText);
   return `---\n${doc.toString(YAML_OPTIONS)}---\n`;
 }
 
@@ -133,7 +147,11 @@ export function updatePost(
   // Only photos new to Cloudinary are added, so a line David deleted stays deleted.
   const listed = new Set(photos.items.map(itemId));
   const added = remote.filter((p) => !known.has(p.name) && !listed.has(p.name));
-  for (const photo of added) photos.add(doc.createNode(photoEntry(photo)));
+  for (const photo of added) {
+    const entry = doc.createNode(photoEntry(photo));
+    quoteText(entry);
+    photos.add(entry);
+  }
 
   if (added.length === 0 && removed.length === 0) return { text, added: [], removed: [] };
   const body = text.slice(match[0].length);

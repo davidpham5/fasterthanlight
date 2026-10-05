@@ -91,8 +91,8 @@ describe('draftPost', () => {
         '  - id: DSCF1',
         '    alt: ""',
         '  - id: DSCF2',
-        '    alt: Cloud alt',
-        '    caption: Cloud caption',
+        '    alt: "Cloud alt"',
+        '    caption: "Cloud caption"',
         '---',
         '',
       ].join('\n'),
@@ -103,8 +103,18 @@ describe('draftPost', () => {
     const alt =
       'A weathered pale-blue Little Free Library cabinet stuffed with books and yarn, its glass door hanging open';
     expect(draftPost({ slug: 'p', title: 'P' }, [photo('A1', { alt })], '2026-10-03')).toContain(
-      `    alt: ${alt}\n`,
+      `    alt: "${alt}"\n`,
     );
+  });
+
+  it('quotes alt and caption so date-like or special text is not read back as another type', () => {
+    const text = draftPost(
+      { slug: 'p', title: 'P' },
+      [photo('A1', { alt: '2026-09-28', caption: 'true: "yes"' })],
+      '2026-10-03',
+    );
+    expect(text).toContain('    alt: "2026-09-28"\n');
+    expect(text).toContain('    caption: "true: \\"yes\\""\n');
   });
 });
 
@@ -150,7 +160,7 @@ photos:
     alt: The second
     lens: Helios 44-2 # manual lens
   - id: DSCF4
-    alt: Cloud alt
+    alt: "Cloud alt"
 ---
 Fuji X-T3, an overcast morning.
 
@@ -158,6 +168,16 @@ Fuji X-T3, an overcast morning.
 
 A second section after a rule.
 `);
+  });
+
+  it('quotes the alt and caption of appended photos', () => {
+    const remote = [
+      photo('DSCF1'),
+      photo('DSCF2'),
+      photo('DSCF5', { alt: '2026-09-28', caption: '1' }),
+    ];
+    const { text } = updatePost(edited, 'peonies', new Set(['DSCF1', 'DSCF2']), remote);
+    expect(text).toContain('  - id: DSCF5\n    alt: "2026-09-28"\n    caption: "1"\n');
   });
 
   it('a photo David deleted from the post stays deleted', () => {
