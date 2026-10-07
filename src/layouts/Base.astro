@@ -11,13 +11,24 @@ interface Props {
   title?: string;
   description?: string;
   noindex?: boolean;
+  /** Social-card image (a site path such as an /img URL); defaults to the hero. */
+  ogImage?: { path: string; alt: string };
+  ogType?: 'website' | 'article';
 }
 
-const { title, description = site.description, noindex = false } = Astro.props;
+const {
+  title,
+  description = site.description,
+  noindex = false,
+  ogImage,
+  ogType = 'website',
+} = Astro.props;
 const fullTitle = title ? `${title} — ${site.name}` : site.name;
 const robots = noindex ? 'noindex, noai, noimageai' : 'noai, noimageai';
 const canonical = new URL(pagePath(Astro.url.pathname), Astro.site).href;
-const ogImage = new URL(urlFor(hero.id, 1600), Astro.site).href;
+const heroImage = new URL(urlFor(hero.id, 1600), Astro.site).href;
+const cardImage = ogImage ? new URL(ogImage.path, Astro.site).href : heroImage;
+const cardAlt = ogImage?.alt ?? hero.alt;
 const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'ProfessionalService',
@@ -25,7 +36,7 @@ const jsonLd = {
   description: site.description,
   url: new URL('/', Astro.site).href,
   email: site.email,
-  image: ogImage,
+  image: heroImage,
   founder: { '@type': 'Person', name: site.owner },
 };
 ---
@@ -44,15 +55,16 @@ const jsonLd = {
     <link rel="preload" href={canelaRegular} as="font" type="font/woff2" crossorigin />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="sitemap" href="/sitemap-index.xml" />
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={ogType} />
     <meta property="og:site_name" content={site.name} />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
-    <meta property="og:image" content={ogImage} />
-    <meta property="og:image:alt" content={hero.alt} />
+    <meta property="og:image" content={cardImage} />
+    <meta property="og:image:alt" content={cardAlt} />
     <meta name="twitter:card" content="summary_large_image" />
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+    <slot name="head" />
   </head>
   <body>
     <a class="skip-link" href="#main">

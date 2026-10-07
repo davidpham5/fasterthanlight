@@ -1,0 +1,56 @@
+---
+import type { GetStaticPaths, Page } from 'astro';
+import LogPost from '../../components/LogPost.astro';
+import Viewer from '../../components/Viewer.astro';
+import Base from '../../layouts/Base.astro';
+import { LOG_DESCRIPTION, publishedPosts, type Post } from '../../lib/log-posts';
+import { POSTS_PER_PAGE } from '../../lib/photo-log';
+import { site } from '../../lib/content';
+
+export const getStaticPaths = (async ({ paginate }) => {
+  const posts = await publishedPosts();
+  // paginate([]) would still build an empty /photo-log; build nothing until something is published.
+  return posts.length ? paginate(posts, { pageSize: POSTS_PER_PAGE }) : [];
+}) satisfies GetStaticPaths;
+
+interface Props {
+  page: Page<Post>;
+}
+
+const { page } = Astro.props;
+const first = page.currentPage === 1;
+---
+
+<Base
+  title={first ? 'Photo Log' : `Photo Log, page ${page.currentPage}`}
+  description={first ? LOG_DESCRIPTION : `${LOG_DESCRIPTION} Page ${page.currentPage}.`}
+>
+  <link
+    slot="head"
+    rel="alternate"
+    type="application/rss+xml"
+    title={`Photo Log — ${site.name}`}
+    href="/photo-log/rss.xml"
+  />
+  <div class="log page">
+    <h1 class="visually-hidden">Photo Log</h1>
+    {page.data.map((post, i) => (
+      <LogPost post={post} heading="h2" eager={i === 0} />
+    ))}
+    {(page.url.prev || page.url.next) && (
+      <nav class="log-pager" aria-label="Photo Log pages">
+        {page.url.prev && (
+          <a href={page.url.prev} rel="prev">
+            ← Newer
+          </a>
+        )}
+        {page.url.next && (
+          <a href={page.url.next} rel="next">
+            Older →
+          </a>
+        )}
+      </nav>
+    )}
+  </div>
+  <Viewer />
+</Base>

@@ -1,0 +1,71 @@
+---
+import { render } from 'astro:content';
+import LogPhoto from './LogPhoto.astro';
+import type { Post } from '../lib/log-posts';
+import { formatDate, isoDate } from '../lib/photo-log';
+
+interface Props {
+  post: Post;
+  /** h2 in the feed (linking to the post), h1 on the post's own page. */
+  heading: 'h1' | 'h2';
+  /** Load the first photo eagerly (the first post on a page). */
+  eager?: boolean;
+}
+
+const { post, heading: Heading, eager = false } = Astro.props;
+const { Content } = await render(post.entry);
+---
+
+<article class="log-post" data-viewer-group>
+  <header class="log-post__header">
+    <Heading class="log-post__title">
+      {Heading === 'h2' ? <a href={`/photo-log/${post.slug}`}>{post.title}</a> : post.title}
+    </Heading>
+    <time datetime={isoDate(post.date)}>{formatDate(post.date)}</time>
+  </header>
+  <div class="log-post__body prose">
+    <Content />
+  </div>
+  <div class="log-post__photos">
+    {post.photos.map((photo, i) => (
+      <LogPhoto photo={photo} priority={eager && i === 0} />
+    ))}
+  </div>
+</article>
+
+<style>
+  .log-post__header,
+  .log-post__body {
+    max-width: 38rem;
+    margin-inline: auto;
+  }
+  .log-post__title {
+    margin: 0;
+    font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+  }
+  .log-post__title a {
+    text-decoration: none;
+  }
+  .log-post__title a:hover {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+  }
+  time {
+    display: block;
+    margin-top: 0.375rem;
+    font-size: 0.875rem;
+    color: var(--muted);
+  }
+  .log-post__body {
+    margin-block: 1rem 2rem;
+  }
+  .log-post__body :global(p) {
+    margin: 0 0 0.75rem;
+  }
+  .log-post__photos {
+    display: grid;
+    gap: clamp(2.5rem, 6vw, 4rem);
+  }
+</style>

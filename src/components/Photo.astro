@@ -1,5 +1,5 @@
 ---
-import { defaultWidth, srcsetFor, urlFor } from '../lib/cloudinary';
+import { defaultWidth, srcsetFor, urlFor, type Width } from '../lib/cloudinary';
 import type { Photo } from '../lib/schema';
 
 interface Props {
@@ -7,9 +7,11 @@ interface Props {
   sizes: string;
   priority?: boolean;
   class?: string;
+  /** Largest width to deliver (the Photo Log stops at 1600). */
+  maxWidth?: Width;
 }
 
-const { photo, sizes, priority = false, class: className } = Astro.props;
+const { photo, sizes, priority = false, class: className, maxWidth } = Astro.props;
 // The blurred placeholder sits behind the image and is covered once the (opaque) photo paints.
 const style = photo.placeholder
   ? `background-image:url(${photo.placeholder});background-size:cover`
@@ -18,8 +20,8 @@ const style = photo.placeholder
 
 <img
   class:list={['photo', className]}
-  src={urlFor(photo.id, defaultWidth(photo.width))}
-  srcset={srcsetFor(photo)}
+  src={urlFor(photo.id, defaultWidth(photo.width, maxWidth))}
+  srcset={srcsetFor(photo, maxWidth)}
   sizes={sizes}
   width={photo.width}
   height={photo.height}

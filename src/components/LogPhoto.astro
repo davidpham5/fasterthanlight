@@ -1,0 +1,58 @@
+---
+import Photo from './Photo.astro';
+import { urlFor } from '../lib/cloudinary';
+import type { ResolvedPhoto } from '../lib/photo-log';
+
+interface Props {
+  photo: ResolvedPhoto;
+  priority?: boolean;
+}
+
+const { photo, priority = false } = Astro.props;
+const ar = +(photo.width / photo.height).toFixed(4);
+// Mirrors the width rule below: the column (≤ 1100px) or the screen height times the aspect ratio.
+const sizes = `min(calc(100vw - 2rem), 1100px, calc((100vh - 6rem) * ${ar}))`;
+---
+
+<figure class="log-photo" style={`--ar:${ar}`}>
+  <!-- Without JavaScript the link opens the image itself; viewer.ts opens it in a dialog. -->
+  <a href={urlFor(photo.id, 1600)} data-viewer-item>
+    <Photo photo={photo} sizes={sizes} priority={priority} maxWidth={1600} />
+  </a>
+  {(photo.camera || photo.caption) && (
+    <figcaption>
+      {photo.camera && <span class="log-photo__camera">{photo.camera}</span>}
+      {photo.caption && <span class="log-photo__caption">{photo.caption}</span>}
+    </figcaption>
+  )}
+</figure>
+
+<style>
+  .log-photo {
+    margin: 0;
+  }
+  /* Tall photos are kept to the screen height, like the gallery, so they never need scrolling. */
+  a {
+    display: block;
+    width: min(100%, calc((100svh - 6rem) * var(--ar)));
+    margin: 0 auto;
+    cursor: zoom-in;
+  }
+  a :global(img) {
+    width: 100%;
+    height: auto;
+    aspect-ratio: var(--ar);
+  }
+  figcaption {
+    margin-top: 0.625rem;
+    text-align: center;
+    font-size: 0.875rem;
+    color: var(--muted);
+  }
+  figcaption span {
+    display: block;
+  }
+  .log-photo__camera {
+    font-size: 0.8125rem;
+  }
+</style>

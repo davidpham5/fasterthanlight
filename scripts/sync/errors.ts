@@ -17,3 +17,8 @@ export function describeError(error: unknown): string {
   }
   return 'Unknown error (details hidden)';
 }
+
+/** True for a Cloudinary "not found" error, such as listing a folder that doesn't exist yet. */
+export function isNotFound(error: unknown): boolean {
+  return (error as { error?: { http_code?: unknown } } | null)?.error?.http_code === 404;
+}

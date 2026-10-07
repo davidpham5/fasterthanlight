@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { describeError } from './errors';
+import { describeError, isNotFound } from './errors';
 
 describe('describeError', () => {
   it('returns only the message from a Cloudinary API error, never the request or credentials', () => {
@@ -30,5 +30,14 @@ describe('describeError', () => {
 
   it('never serialises unknown objects', () => {
     expect(describeError({ auth: 'KEY:SECRET' })).toBe('Unknown error (details hidden)');
+  });
+});
+
+describe('isNotFound', () => {
+  it('recognises a Cloudinary 404 without reading anything else', () => {
+    expect(isNotFound({ error: { message: "Can't find folder", http_code: 404 } })).toBe(true);
+    expect(isNotFound({ error: { http_code: 403 } })).toBe(false);
+    expect(isNotFound(new Error('404'))).toBe(false);
+    expect(isNotFound(null)).toBe(false);
   });
 });

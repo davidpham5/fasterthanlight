@@ -7,3 +7,5 @@ docs
 .lighthouseci
 playwright-report
 test-results
+src/content/photo-log.json
+src/content/photo-log

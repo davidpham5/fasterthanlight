@@ -3,7 +3,11 @@
     "collect": {
       "startServerCommand": "npx astro preview --port 4329 --ignore-lock",
       "startServerReadyPattern": "localhost:4329",
-      "url": ["http://localhost:4329/", "http://localhost:4329/gallery/special-events"],
+      "url": [
+        "http://localhost:4329/",
+        "http://localhost:4329/gallery/special-events",
+        "http://localhost:4329/photo-log"
+      ],
       "numberOfRuns": 3
     },
     "assert": {
